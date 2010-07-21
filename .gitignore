@@ -3,3 +3,4 @@ WebContent/VAADIN/*
 build/*
 .DS_STORE
 gwt/*
+dist/*
