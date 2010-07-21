@@ -1,4 +1,5 @@
 MaskedTextField for Vaadin
+=========================================
 
 For more information please checkout http://vaadin.com/addon/maskedtextfield
 
@@ -25,18 +26,32 @@ State: UU
 HTML Color: '#HHHHHH
 An capitalized 6 letter word: ULLLLLL
 
-=====================
-TODO:
+
+
+TODO
+=========================================
 	- setValidChars(",. ")
 	- Create an tab "try it" to allow the Demo App user to specify the mask and see the mask applied in real-time.
 	- Deploy demo app somewhere
 	- Test on Windows under IE6, IE7 & IE8, Firefox 3
 
-=====================
-Known issues:
-	None.
 
-=====================
-FUTURE ROADMAP:
+
+Known issues:
+=========================================
+	None. =)
+
+
+
+FUTURE ROADMAP
+=========================================
  - Support for left aligned input with 0 filling.
  - Currency and thousand separators
+
+
+CHANGELOG
+=========================================
+* 20th July 2010 (tag 0.1.0)
+	- public release
+
+
