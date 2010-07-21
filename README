@@ -1,5 +1,7 @@
 MaskedTextField for Vaadin
 
+For more information please checkout http://vaadin.com/addon/maskedtextfield
+
 Current Valid masks:
 
 # - any number
@@ -13,7 +15,6 @@ H - hex sign (0-9, a-f or A-F)
 ~ - +/- sign
 
 TODO:
-	- ignore "_" when getting values
 	- Demo App getValue() 
 	- setValidChars(",. ")
 	- getValue() - with mask and no _
@@ -23,7 +24,11 @@ TODO:
 	- test under IE6, IE7 & IE8, Firefox 3
 
 Known issues:
-	TAB and ESC keys aren't working on Firefox
+	None.
+
+
+
+
 
 FUTURE ROADMAP:
 
