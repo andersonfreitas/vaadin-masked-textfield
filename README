@@ -27,13 +27,10 @@ An capitalized 6 letter word: ULLLLLL
 
 =====================
 TODO:
-	- Demo App getValue() 
 	- setValidChars(",. ")
-	- getValue() - with mask and no _
-	- getLiteralValue() - no mask
-	- Tab try it in the Demo App
+	- Create an tab "try it" to allow the Demo App user to specify the mask and see the mask applied in real-time.
 	- Deploy demo app somewhere
-	- test under IE6, IE7 & IE8, Firefox 3
+	- Test on Windows under IE6, IE7 & IE8, Firefox 3
 
 =====================
 Known issues:
