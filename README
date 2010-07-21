@@ -14,7 +14,7 @@ H - hex sign (0-9, a-f or A-F)
 ' - Escape character, used to escape any of the special formatting characters.
 ~ - +/- sign
 
-Any character not matching one of the above mask character or if it escaped with the ' is considered to be a literal.
+Any character not matching one of the above mask character or if it escaped with the single quote character (') is considered to be a literal.
 
 Some mask examples:
 
