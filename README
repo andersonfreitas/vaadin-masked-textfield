@@ -1,0 +1,54 @@
+MaskedTextField for Vaadin
+
+Current Valid masks:
+
+# - any number
+U - upper-case letter
+L - lower-case letter
+? - any letter
+A - any number or character
+* - anything
+H - hex sign (0-9, a-f or A-F)
+' - Escape character, used to escape any of the special formatting characters.
+~ - +/- sign
+
+TODO:
+	- ignore "_" when getting values
+	- Demo App getValue() 
+	- setValidChars(",. ")
+	- getValue() - with mask and no _
+	- getLiteralValue() - no mask
+	- Tab try it in the Demo App
+	- Deploy demo app somewhere
+	- test under IE6, IE7 & IE8, Firefox 3
+
+Known issues:
+	TAB and ESC keys aren't working on Firefox
+
+FUTURE ROADMAP:
+
+Zero Mode - mask: TR-0000
+TR-0000 - initialized with 0
+TR-0001
+TR-0011
+TR-0111
+TR-1111
+
+Number Mode - mask: NNNNNNNN
+      0 - initialized with 0
+      1
+     10
+    100
+  1.000
+ 10.000
+100.000
+
+Currency mode - mask: R$ CCCCCCCCCC
+     R$ 0,00 - initialized with 0
+     R$ 0,05 - first type
+     R$ 0,55
+     R$ 5,55
+    R$ 55,55
+   R$ 555,55
+ R$ 5.555,55
+R$ 55.555,55
