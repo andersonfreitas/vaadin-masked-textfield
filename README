@@ -24,7 +24,7 @@ USPS Express Mail: EU#########'US
 Date / time: ##/##/#### ##:##
 State: UU
 HTML Color: '#HHHHHH
-An capitalized 6 letter word: ULLLLLL
+An capitalized 6 letter word: ULLLLL
 
 
 
@@ -33,7 +33,6 @@ TODO
 	- setValidChars(",. ")
 	- Create an tab "try it" to allow the Demo App user to specify the mask and see the mask applied in real-time.
 	- Deploy demo app somewhere
-	- Test on Windows under IE6, IE7 & IE8, Firefox 3
 
 
 
