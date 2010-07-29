@@ -126,8 +126,14 @@ public class VMaskedTextField extends VTextField {
 
 	@Override
 	public void updateFromUIDL(UIDL uidl, ApplicationConnection client) {
-		super.updateFromUIDL(uidl, client);
 		setMask(uidl.getStringAttribute("mask"));
+		super.updateFromUIDL(uidl, client);
+	}
+	
+	@Override
+	public void setText(String value) {
+		string = new StringBuilder(value);
+		super.setText(value);
 	}
 
 	private void setMask(String mask) {
