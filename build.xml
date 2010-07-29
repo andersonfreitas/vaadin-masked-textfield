@@ -72,14 +72,14 @@ See configure target to adjust this buildfile.
 
     <!-- Note: Modify this example to compile your own widgetset Jar. -->
     <target name="configure-jar">
+        <!-- Version of the widget set (for JAR) -->
+        <property name="widgetset-version" value="0.1.1"/>
+        
         <!-- The compiled JAR name -->
-        <property name="jar-destination" value="${base}dist/vaadin-masked-textfield.jar"/>
+        <property name="jar-destination" value="${base}dist/vaadin-masked-textfield-${widgetset-version}.jar"/>
 
         <!-- Title of the widget set (for JAR) -->
         <property name="widgetset-title" value="MaskedTextField"/>
-        
-        <!-- Version of the widget set (for JAR) -->
-        <property name="widgetset-version" value="0.1.0"/>
         
         <!-- Vendor of the widget set (for JAR) -->
         <property name="widgetset-vendor" value="Anderson Freitas"/>
