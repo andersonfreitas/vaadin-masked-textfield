@@ -102,6 +102,7 @@ public class DemoApplication extends Application {
 	}
 }
 
+/* Copied from Vaadin FeatureBrowser */
 @SuppressWarnings("serial")
 class FormExample extends CustomComponent {
 
@@ -170,7 +171,8 @@ class FormExample extends CustomComponent {
             setFooter(footer);
         }
 
-        public void setDataSource(Address dataModel) {
+        @SuppressWarnings("unchecked")
+		public void setDataSource(Address dataModel) {
 
             // Set the form to edit given datamodel by converting pojo used as
             // the datamodel to Item
