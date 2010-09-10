@@ -33,6 +33,10 @@ public class MaskedTextField extends TextField {
 		super(caption, dataSource);
 	}
 
+	public String getMask() {
+		return mask;
+	}
+	
 	public void setMask(String mask) {
 		this.mask = mask;
 		requestRepaint();
