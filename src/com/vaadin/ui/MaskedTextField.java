@@ -16,12 +16,12 @@ public class MaskedTextField extends TextField {
 	public MaskedTextField() {
 	}
 
-	public MaskedTextField(String string) {
-		setCaption(string);
+	public MaskedTextField(String caption) {
+		setCaption(caption);
 	}
 
-	public MaskedTextField(String string, String mask) {
-		setCaption(string);
+	public MaskedTextField(String caption, String mask) {
+		setCaption(caption);
 		setMask(mask);
 	}
 
