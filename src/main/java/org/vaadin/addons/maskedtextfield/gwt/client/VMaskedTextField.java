@@ -1,8 +1,11 @@
-package com.vaadin.terminal.gwt.client.ui;
+package org.vaadin.addons.maskedtextfield.gwt.client;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import com.vaadin.terminal.gwt.client.ApplicationConnection;
+import com.vaadin.terminal.gwt.client.UIDL;
+import com.vaadin.terminal.gwt.client.ui.VTextField;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
@@ -12,8 +15,6 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
-import com.vaadin.terminal.gwt.client.ApplicationConnection;
-import com.vaadin.terminal.gwt.client.UIDL;
 
 public class VMaskedTextField extends VTextField {
 	private KeyPressHandler keyPressHandler = new KeyPressHandler() {
@@ -28,8 +29,7 @@ public class VMaskedTextField extends VTextField {
 					|| e.getCharCode() == KeyCodes.KEY_LEFT
 					|| e.getCharCode() == KeyCodes.KEY_PAGEDOWN
 					|| e.getCharCode() == KeyCodes.KEY_PAGEUP
-					|| e.getCharCode() == KeyCodes.KEY_RIGHT
-					|| e.getCharCode() == KeyCodes.KEY_TAB
+					|| e.getCharCode() == KeyCodes.KEY_RIGHT					
 					|| e.isAnyModifierKeyDown())
 				return;
 			if (getCursorPos() < maskTest.size()) {
@@ -44,7 +44,7 @@ public class VMaskedTextField extends VTextField {
 				} else {
 					updateCursor(getCursorPos());
 				}
-			}
+			}			
 			e.preventDefault();
 		}
 	};
@@ -92,8 +92,10 @@ public class VMaskedTextField extends VTextField {
 	private FocusHandler focusHandler = new FocusHandler() {
 		@Override
 		public void onFocus(FocusEvent event) {
-			if (getValue().isEmpty())
+			if (getValue().isEmpty()){
 				setMask(mask);
+				setCursorPos(0);
+			}
 			else
 				setCursorPos(getPreviousPos(0));
 		}

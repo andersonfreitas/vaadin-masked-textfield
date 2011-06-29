@@ -1,10 +1,11 @@
-package com.vaadin.terminal.gwt.client.ui;
+package org.vaadin.addons.maskedtextfield.gwt.client;
 
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.vaadin.terminal.gwt.client.ui.VTextField;
 
 public class VNumericField extends VTextField {
 	public VNumericField() {
