@@ -30,15 +30,15 @@ An capitalized 6 letter word: ULLLLL
 
 TODO
 =========================================
-	- setValidChars(",. ")
-	- Create an tab "try it" to allow the Demo App user to specify the mask and see the mask applied in real-time.
-	- Deploy demo app somewhere
+- setValidChars(",. ")
+- Create an tab "try it" to allow the Demo App user to specify the mask and see the mask applied in real-time.
+- Deploy demo app somewhere
 
 
 
 Known issues:
 =========================================
-	None. =)
+None. =)
 
 
 
@@ -50,7 +50,6 @@ FUTURE ROADMAP
 
 CHANGELOG
 =========================================
-* 20th July 2010 (tag 0.1.0)
-	- public release
-
-
+* 30th June 2011 (tag 0.1.2)
+- tab key press corrected
+- cursor is positioned in first position allowed when field is focused.

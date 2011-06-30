@@ -1,7 +1,10 @@
-package com.vaadin.ui;
+package org.vaadin.addons.maskedtextfield;
+
+import org.vaadin.addons.maskedtextfield.gwt.client.VNumericField;
 
 import com.vaadin.data.Property;
-import com.vaadin.terminal.gwt.client.ui.VNumericField;
+import com.vaadin.ui.ClientWidget;
+import com.vaadin.ui.TextField;
 
 @ClientWidget(VNumericField.class)
 public class NumericField extends TextField {
