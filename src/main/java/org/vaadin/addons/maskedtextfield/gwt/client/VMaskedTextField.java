@@ -130,7 +130,6 @@ public class VMaskedTextField extends VTextField implements KeyDownHandler,
 				validateAndShoywUserInput(event);
 			}
 		}
-		// event.preventDefault();
 	}
 
 	private boolean isKeyIgnored(KeyPressEvent event) {
@@ -209,7 +208,6 @@ public class VMaskedTextField extends VTextField implements KeyDownHandler,
 		}
 	}
 
-	@Override
 	public void onFocus(FocusEvent event) {
 		if (getValue().isEmpty()) {
 			setMask(mask);
@@ -217,7 +215,6 @@ public class VMaskedTextField extends VTextField implements KeyDownHandler,
 			setCursorPos(getPreviousPosition(0));
 	}
 
-	@Override
 	public void onBlur(BlurEvent event) {
 		for (int index = 0; index < string.length(); index++) {
 			char character = string.charAt(index);
