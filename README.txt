@@ -50,5 +50,6 @@ FUTURE ROADMAP
 
 CHANGELOG
 =========================================
-* 20th July 2010 (tag 0.1.0)
-- public release
+* 30th June 2011 (tag 0.1.2)
+- tab key press corrected
+- cursor is positioned in first position allowed when field is focused.
