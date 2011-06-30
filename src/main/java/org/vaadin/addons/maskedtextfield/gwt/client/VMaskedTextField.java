@@ -3,6 +3,16 @@ package org.vaadin.addons.maskedtextfield.gwt.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.vaadin.addons.maskedtextfield.gwt.client.masks.AlphanumericMask;
+import org.vaadin.addons.maskedtextfield.gwt.client.masks.HexMask;
+import org.vaadin.addons.maskedtextfield.gwt.client.masks.LetterMask;
+import org.vaadin.addons.maskedtextfield.gwt.client.masks.LowerCaseMask;
+import org.vaadin.addons.maskedtextfield.gwt.client.masks.Mask;
+import org.vaadin.addons.maskedtextfield.gwt.client.masks.NumericMask;
+import org.vaadin.addons.maskedtextfield.gwt.client.masks.SignMask;
+import org.vaadin.addons.maskedtextfield.gwt.client.masks.UpperCaseMask;
+import org.vaadin.addons.maskedtextfield.gwt.client.masks.WildcardMask;
+
 import com.vaadin.terminal.gwt.client.ApplicationConnection;
 import com.vaadin.terminal.gwt.client.UIDL;
 import com.vaadin.terminal.gwt.client.ui.VTextField;
@@ -16,122 +26,28 @@ import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 
-public class VMaskedTextField extends VTextField {
-	private KeyPressHandler keyPressHandler = new KeyPressHandler() {
-		@Override
-		public void onKeyPress(KeyPressEvent e) {
-			if (e.getCharCode() == KeyCodes.KEY_BACKSPACE
-					|| e.getCharCode() == KeyCodes.KEY_DELETE
-					|| e.getCharCode() == KeyCodes.KEY_END
-					|| e.getCharCode() == KeyCodes.KEY_ENTER
-					|| e.getCharCode() == KeyCodes.KEY_ESCAPE
-					|| e.getCharCode() == KeyCodes.KEY_HOME
-					|| e.getCharCode() == KeyCodes.KEY_LEFT
-					|| e.getCharCode() == KeyCodes.KEY_PAGEDOWN
-					|| e.getCharCode() == KeyCodes.KEY_PAGEUP
-					|| e.getCharCode() == KeyCodes.KEY_RIGHT					
-					|| e.isAnyModifierKeyDown())
-				return;
-			if (getCursorPos() < maskTest.size()) {
-				Mask m = maskTest.get(getCursorPos());
-				if (m != null) {
-					if (m.isValid(e.getCharCode())) {
-						int pos = getCursorPos();
-						string.setCharAt(pos, m.getChar(e.getCharCode()));
-						setValue(string.toString());
-						updateCursor(pos);
-					}
-				} else {
-					updateCursor(getCursorPos());
-				}
-			}			
-			e.preventDefault();
-		}
-	};
-	
-	private KeyDownHandler keyDownHandler = new KeyDownHandler() {
-		@Override
-		public void onKeyDown(KeyDownEvent event) {
-			if (event.getNativeKeyCode() == KeyCodes.KEY_BACKSPACE) {
-				int pos = getPreviousPos(getCursorPos());
-				Mask m = maskTest.get(pos);
-				if (m != null) {
-					string.setCharAt(pos, placeholder);
-					setValue(string.toString());
-				}
-				setCursorPos(pos);
-				event.preventDefault();
-			} else if (event.getNativeKeyCode() == KeyCodes.KEY_DELETE) {
-				int pos = getCursorPos();
-				
-				Mask m = maskTest.get(pos);
-				if (m != null) {
-					string.setCharAt(pos, placeholder);
-					setValue(string.toString());
-				}
-				updateCursor(pos);
-				event.preventDefault();
-			} else if (event.getNativeKeyCode() == KeyCodes.KEY_RIGHT) {
-				setCursorPos(getNextPos(getCursorPos()));
-				event.preventDefault();
-			} else if (event.getNativeKeyCode() == KeyCodes.KEY_LEFT) {
-				setCursorPos(getPreviousPos(getCursorPos()));
-				event.preventDefault();
-			} else if (event.getNativeKeyCode() == KeyCodes.KEY_HOME || event.getNativeKeyCode() == KeyCodes.KEY_UP) {
-				setCursorPos(getPreviousPos(0));
-				event.preventDefault();
-			} else if (event.getNativeKeyCode() == KeyCodes.KEY_END || event.getNativeKeyCode() == KeyCodes.KEY_DOWN) {
-				setCursorPos(getPreviousPos(getValue().length()) + 1);
-				event.preventDefault();
-			}
-		}
-	};
+public class VMaskedTextField extends VTextField implements KeyDownHandler,
+		FocusHandler, BlurHandler, KeyPressHandler {
 
 	protected String mask;
-	
-	private FocusHandler focusHandler = new FocusHandler() {
-		@Override
-		public void onFocus(FocusEvent event) {
-			if (getValue().isEmpty()){
-				setMask(mask);
-				setCursorPos(0);
-			}
-			else
-				setCursorPos(getPreviousPos(0));
-		}
-	};
-	
-	private BlurHandler blurHandler = new BlurHandler() {
-		@Override
-		public void onBlur(BlurEvent event) {
-			for (int i = 0; i < string.length(); i++) {
-				char c = string.charAt(i);
-
-				if (maskTest.get(i) != null && c == placeholder) {
-					setValue("");
-					valueChange(true);
-					return;
-				}
-			}
-		}
-	};
+	private char placeholder = '_';
+	private StringBuilder string;
+	private List<Mask> maskTest;
 
 	public VMaskedTextField() {
 		super();
-		addKeyPressHandler(keyPressHandler);
-		addKeyDownHandler(keyDownHandler);
-		addFocusHandler(focusHandler);
-		addBlurHandler(blurHandler);
+		addKeyPressHandler(this);
+		addKeyDownHandler(this);
+		addFocusHandler(this);
+		addBlurHandler(this);
 	}
-
-	private List<Mask> maskTest;
 
 	@Override
 	public void updateFromUIDL(UIDL uidl, ApplicationConnection client) {
 		setMask(uidl.getStringAttribute("mask"));
 		super.updateFromUIDL(uidl, client);
 	}
-	
+
 	@Override
 	public void setText(String value) {
 		string = new StringBuilder(value);
@@ -142,176 +58,174 @@ public class VMaskedTextField extends VTextField {
 		this.mask = mask;
 		string = new StringBuilder();
 		maskTest = new ArrayList<Mask>();
-		
-		for (int i = 0; i < mask.length(); i++) {
-			char c = mask.charAt(i);
+		configureUserView();
+		getNextPosition(-1);
+	}
 
-			if (c == '\'') {
-				maskTest.add(null);
-				string.append(mask.charAt(++i));
-			} else if (c == '#') {
-				maskTest.add(new NumericMask());
-				string.append(placeholder);
-			} else if (c == 'U') {
-				maskTest.add(new UpperCaseMask());
-				string.append(placeholder);
-			} else if (c == 'L') {
-				maskTest.add(new LowerCaseMask());
-				string.append(placeholder);
-			} else if (c == '?') {
-				maskTest.add(new LetterMask());
-				string.append(placeholder);
-			} else if (c == 'A') {
-				maskTest.add(new AlphanumericMask());
-				string.append(placeholder);
-			} else if (c == '*') {
-				maskTest.add(new WildcardMask());
-				string.append(placeholder);
-			} else if (c == 'H') {
-				maskTest.add(new HexMask());
-				string.append(placeholder);
-			} else if (c == '~') {
-				maskTest.add(new SignMask());
-				string.append(placeholder);
-			} else {
-				maskTest.add(null);
-				string.append(c);
-			}				
+	private void configureUserView() {
+		for (int index = 0; index < mask.length(); index++) {
+			char character = mask.charAt(index);
+			createCorrectMaskAndPlaceholder(character, index);
 		}
 		setValue(string.toString());
-		updateCursor(0);
 	}
-	
-	private char placeholder = '_';
 
-	private StringBuilder string;
+	private void createCorrectMaskAndPlaceholder(char character, int index) {
+		if (character == '\'') {
+			addMaskStrategyAndCharacterPlaceHolder(null, mask.charAt(++index));
+		} else if (character == '#') {
+			addMaskStrategyAndCharacterPlaceHolder(new NumericMask(),
+					placeholder);
+		} else if (character == 'U') {
+			addMaskStrategyAndCharacterPlaceHolder(new UpperCaseMask(),
+					placeholder);
+		} else if (character == 'L') {
+			addMaskStrategyAndCharacterPlaceHolder(new LowerCaseMask(),
+					placeholder);
+		} else if (character == '?') {
+			addMaskStrategyAndCharacterPlaceHolder(new LetterMask(),
+					placeholder);
+		} else if (character == 'A') {
+			addMaskStrategyAndCharacterPlaceHolder(new AlphanumericMask(),
+					placeholder);
+		} else if (character == '*') {
+			addMaskStrategyAndCharacterPlaceHolder(new WildcardMask(),
+					placeholder);
+		} else if (character == 'H') {
+			addMaskStrategyAndCharacterPlaceHolder(new HexMask(), placeholder);
+		} else if (character == '~') {
+			addMaskStrategyAndCharacterPlaceHolder(new SignMask(), placeholder);
+		} else {
+			addMaskStrategyAndCharacterPlaceHolder(null, character);
+		}
+	}
 
-	/*
+	private void addMaskStrategyAndCharacterPlaceHolder(Mask maskStrategy,
+			char characterPlaceholder) {
+		maskTest.add(maskStrategy);
+		string.append(characterPlaceholder);
+	}
+
+	private int getNextPosition(int position) {
+		while (++position < maskTest.size() && maskTest.get(position) == null)
+			;
+		return position;
+	}
+
+	int getPreviousPosition(int position) {
+		while (--position >= 0 && maskTest.get(position) == null)
+			;
+		if (position < 0)
+			return getNextPosition(position);
+		return position;
+	}
+
+	private int getLastPosition() {
+		return getValue().length() + 1;
+	}
+
+	public void onKeyPress(KeyPressEvent event) {
+		if (!isKeyIgnored(event)) {
+			if (getCursorPos() < maskTest.size()) {
+				validateAndShoywUserInput(event);
+			}
+		}
+		// event.preventDefault();
+	}
+
+	private boolean isKeyIgnored(KeyPressEvent event) {
+		return event.getCharCode() == KeyCodes.KEY_BACKSPACE
+				|| event.getCharCode() == KeyCodes.KEY_TAB
+				|| event.getCharCode() == KeyCodes.KEY_DELETE
+				|| event.getCharCode() == KeyCodes.KEY_END
+				|| event.getCharCode() == KeyCodes.KEY_ENTER
+				|| event.getCharCode() == KeyCodes.KEY_ESCAPE
+				|| event.getCharCode() == KeyCodes.KEY_HOME
+				|| event.getCharCode() == KeyCodes.KEY_LEFT
+				|| event.getCharCode() == KeyCodes.KEY_PAGEDOWN
+				|| event.getCharCode() == KeyCodes.KEY_PAGEUP
+				|| event.getCharCode() == KeyCodes.KEY_RIGHT
+				|| event.isAnyModifierKeyDown();
+	}
+
+	private void validateAndShoywUserInput(KeyPressEvent event) {
+		Mask maskStrategy = maskTest.get(getCursorPos());
+		if (maskStrategy != null) {
+			if (maskStrategy.isValid(event.getCharCode())) {
+				char character = maskStrategy.getChar(event.getCharCode());
+				showUserInput(character);
+				event.preventDefault();
+			}
+		} else {
+			setCursorPos(getNextPosition(getCursorPos()));
+		}		
+	}
+
+	private void showUserInput(char character) {
+		int currentPosition = getCursorPos();
+		string.setCharAt(currentPosition, character);
+		setValue(string.toString());
+		setCursorPos(getNextPosition(currentPosition));
+	}
+
 	@Override
-	public String getValue() {
-		StringBuilder result = new StringBuilder();
-
-		for (int i = 0; i < string.length(); i++) {
-			char c = string.charAt(i);
-
-			if (maskTest.get(i) != null && c != placeholder)
-				result.append(c);
-		}
-		return result.toString();
-	}
-	*/
-
-	private void updateCursor(int pos) {
-		setCursorPos(getNextPos(pos));	
-	}
-
-	private int getNextPos(int pos) {
-		while (++pos < maskTest.size() && maskTest.get(pos) == null);
-		return pos;
-	}
-	
-	int getPreviousPos(int pos) {
-		while (--pos >= 0 && maskTest.get(pos) == null);
-		if (pos < 0)
-			return getNextPos(pos);
-		return pos;
-	}
-	
-	private interface Mask {
-		boolean isValid(char c);
-
-		char getChar(char c);
-	}
-
-	private abstract class AbstractMask implements Mask {
-		@Override
-		public char getChar(char c) {
-			return c;
+	public void onKeyDown(KeyDownEvent event) {
+		if (event.getNativeKeyCode() == KeyCodes.KEY_BACKSPACE) {
+			deleteCharacterAndPositionCursor(event,
+					getPreviousPosition(getCursorPos()));
+		} else if (event.getNativeKeyCode() == KeyCodes.KEY_DELETE) {
+			deleteCharacterAndPositionCursor(event, getCursorPos());
+		} else if (event.getNativeKeyCode() == KeyCodes.KEY_RIGHT) {
+			setCursorPositionAndPreventDefault(event,getNextPosition(getCursorPos()));
+		} else if (event.getNativeKeyCode() == KeyCodes.KEY_LEFT) {
+			setCursorPositionAndPreventDefault(event, getPreviousPosition(getCursorPos()));
+		} else if (event.getNativeKeyCode() == KeyCodes.KEY_HOME
+				|| event.getNativeKeyCode() == KeyCodes.KEY_UP) {
+			setCursorPositionAndPreventDefault(event, getPreviousPosition(0));
+		} else if (event.getNativeKeyCode() == KeyCodes.KEY_END
+				|| event.getNativeKeyCode() == KeyCodes.KEY_DOWN) {
+			setCursorPositionAndPreventDefault(event, getLastPosition());
+		} else {
+			super.onKeyDown(event);
 		}
 	}
 
-	private class NumericMask extends AbstractMask {
-		@Override
-		public boolean isValid(char c) {
-			return Character.isDigit(c);
+	private void deleteCharacterAndPositionCursor(KeyDownEvent event,
+			int position) {
+		deleteCharacter(position);
+		setCursorPositionAndPreventDefault(event, position);
+	}
+
+	private void setCursorPositionAndPreventDefault(KeyDownEvent event,int position) {
+		setCursorPos(position);
+		event.preventDefault();
+	}
+
+	private void deleteCharacter(int position) {
+		Mask maskStrategy = maskTest.get(position);
+		if (maskStrategy != null) {
+			string.setCharAt(position, placeholder);
+			setValue(string.toString());
 		}
 	}
 
-	private class LetterMask extends AbstractMask {
-		@Override
-		public boolean isValid(char c) {
-			return Character.isLetter(c);
-		}
+	@Override
+	public void onFocus(FocusEvent event) {
+		if (getValue().isEmpty()) {
+			setMask(mask);
+		} else
+			setCursorPos(getPreviousPosition(0));
 	}
 
-	private class LowerCaseMask implements Mask {
-		@Override
-		public boolean isValid(char c) {
-			return Character.isLetter(getChar(c));
-		}
-
-		@Override
-		public char getChar(char c) {
-			return Character.toLowerCase(c);
-		}
-	}
-
-	private class UpperCaseMask implements Mask {
-		@Override
-		public boolean isValid(char c) {
-			return Character.isLetter(getChar(c));
-		}
-
-		@Override
-		public char getChar(char c) {
-			return Character.toUpperCase(c);
+	@Override
+	public void onBlur(BlurEvent event) {
+		for (int index = 0; index < string.length(); index++) {
+			char character = string.charAt(index);
+			if (maskTest.get(index) != null && character == placeholder) {
+				setValue("");
+				valueChange(true);
+				return;
+			}
 		}
 	}
-	
-	private class AlphanumericMask extends AbstractMask {
-		@Override
-		public boolean isValid(char c) {
-			return Character.isLetter(c) || Character.isDigit(c);
-		}
-	}
-	
-	private class WildcardMask extends AbstractMask {
-		@Override
-		public boolean isValid(char c) {
-			return true;
-		}
-	}
-	
-	private class SignMask extends AbstractMask {
-		@Override
-		public boolean isValid(char c) {
-			return c == '-' || c == '+';
-		}
-	}
-	
-	/**
-     * Represents a hex character, 0-9a-fA-F. a-f is mapped to A-F
-     */
-    private class HexMask implements Mask {
-        public boolean isValid(char c) {
-            return ((c == '0' || c == '1' ||
-                     c == '2' || c == '3' ||
-                     c == '4' || c == '5' ||
-                     c == '6' || c == '7' ||
-                     c == '8' || c == '9' ||
-                     c == 'a' || c == 'A' ||
-                     c == 'b' || c == 'B' ||
-                     c == 'c' || c == 'C' ||
-                     c == 'd' || c == 'D' ||
-                     c == 'e' || c == 'E' ||
-                     c == 'f' || c == 'F'));
-        }
-
-        public char getChar(char c) {
-            if (Character.isDigit(c)) {
-                return c;
-            }
-            return Character.toUpperCase(c);
-        }
-    }
 }

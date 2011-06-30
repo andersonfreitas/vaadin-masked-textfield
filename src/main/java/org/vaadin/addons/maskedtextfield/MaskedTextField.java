@@ -5,7 +5,6 @@ import org.vaadin.addons.maskedtextfield.gwt.client.VMaskedTextField;
 import com.vaadin.data.Property;
 import com.vaadin.terminal.PaintException;
 import com.vaadin.terminal.PaintTarget;
-import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.ClientWidget;
 import com.vaadin.ui.TextField;
 
@@ -50,7 +49,6 @@ public class MaskedTextField extends TextField {
 	@Override
 	public void paintContent(PaintTarget target) throws PaintException {
 		super.paintContent(target);
-
 		if (mask != null) {
 			target.addAttribute("mask", mask);
 		}
