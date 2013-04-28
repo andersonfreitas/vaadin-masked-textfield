@@ -5,3 +5,6 @@ build/*
 gwt/*
 dist/*
 /target
+.settings
+.project
+.classpath
