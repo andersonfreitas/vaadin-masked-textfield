@@ -3,8 +3,11 @@ WebContent/VAADIN/*
 build/*
 .DS_STORE
 gwt/*
+bin/
+src/test
+src/main/webapp
 dist/*
 /target
-.settings
+.settings/
 .project
 .classpath
