@@ -1,4 +1,4 @@
-package org.vaadin.addons.maskedtextfield.gwt.client.masks;
+package org.vaadin.addons.maskedtextfield.client.masks;
 
 public class LowerCaseMask implements Mask {
 	

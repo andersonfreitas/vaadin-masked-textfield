@@ -1,21 +1,16 @@
 package org.vaadin.addons.maskedtextfield;
 
-import org.vaadin.addons.maskedtextfield.gwt.client.VMaskedTextField;
+import org.vaadin.addons.maskedtextfield.client.MaskedTextFieldState;
 
 import com.vaadin.data.Property;
-import com.vaadin.terminal.PaintException;
-import com.vaadin.terminal.PaintTarget;
-import com.vaadin.ui.ClientWidget;
 import com.vaadin.ui.TextField;
 
 /**
  * Server side component for the VMaskedTextField widget.
  */
-@ClientWidget(VMaskedTextField.class)
 public class MaskedTextField extends TextField {
-	private static final long serialVersionUID = -5168618178262041249L;
 
-	private String mask;
+	private static final long serialVersionUID = 1L;
 
 	public MaskedTextField() {
 	}
@@ -29,28 +24,25 @@ public class MaskedTextField extends TextField {
 		setMask(mask);
 	}
 
-	public MaskedTextField(Property dataSource) {
+	public MaskedTextField(Property<String> dataSource) {
 		super(dataSource);
 	}
 
-	public MaskedTextField(String caption, Property dataSource) {
+	public MaskedTextField(String caption, Property<String> dataSource) {
 		super(caption, dataSource);
 	}
 
 	public String getMask() {
-		return mask;
+		return getState().mask;
 	}
 	
 	public void setMask(String mask) {
-		this.mask = mask;
-		requestRepaint();
+		getState().mask = mask;
+	}
+
+	@Override
+	protected MaskedTextFieldState getState() {
+		return (MaskedTextFieldState) super.getState();
 	}
 	
-	@Override
-	public void paintContent(PaintTarget target) throws PaintException {
-		super.paintContent(target);
-		if (mask != null) {
-			target.addAttribute("mask", mask);
-		}
-	}
 }

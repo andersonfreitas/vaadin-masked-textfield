@@ -1,21 +1,18 @@
-package org.vaadin.addons.maskedtextfield.gwt.client;
+package org.vaadin.addons.maskedtextfield.client;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.vaadin.addons.maskedtextfield.gwt.client.masks.AlphanumericMask;
-import org.vaadin.addons.maskedtextfield.gwt.client.masks.HexMask;
-import org.vaadin.addons.maskedtextfield.gwt.client.masks.LetterMask;
-import org.vaadin.addons.maskedtextfield.gwt.client.masks.LowerCaseMask;
-import org.vaadin.addons.maskedtextfield.gwt.client.masks.Mask;
-import org.vaadin.addons.maskedtextfield.gwt.client.masks.NumericMask;
-import org.vaadin.addons.maskedtextfield.gwt.client.masks.SignMask;
-import org.vaadin.addons.maskedtextfield.gwt.client.masks.UpperCaseMask;
-import org.vaadin.addons.maskedtextfield.gwt.client.masks.WildcardMask;
+import org.vaadin.addons.maskedtextfield.client.masks.AlphanumericMask;
+import org.vaadin.addons.maskedtextfield.client.masks.HexMask;
+import org.vaadin.addons.maskedtextfield.client.masks.LetterMask;
+import org.vaadin.addons.maskedtextfield.client.masks.LowerCaseMask;
+import org.vaadin.addons.maskedtextfield.client.masks.Mask;
+import org.vaadin.addons.maskedtextfield.client.masks.NumericMask;
+import org.vaadin.addons.maskedtextfield.client.masks.SignMask;
+import org.vaadin.addons.maskedtextfield.client.masks.UpperCaseMask;
+import org.vaadin.addons.maskedtextfield.client.masks.WildcardMask;
 
-import com.vaadin.terminal.gwt.client.ApplicationConnection;
-import com.vaadin.terminal.gwt.client.UIDL;
-import com.vaadin.terminal.gwt.client.ui.VTextField;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
@@ -25,8 +22,9 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.vaadin.client.ui.VTextField;
 
-public class VMaskedTextField extends VTextField implements KeyDownHandler,
+public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 		FocusHandler, BlurHandler, KeyPressHandler {
 
 	protected String mask;
@@ -34,7 +32,7 @@ public class VMaskedTextField extends VTextField implements KeyDownHandler,
 	private StringBuilder string;
 	private List<Mask> maskTest;
 
-	public VMaskedTextField() {
+	public MaskedTextFieldWidget() {
 		super();
 		addKeyPressHandler(this);
 		addKeyDownHandler(this);
@@ -43,18 +41,12 @@ public class VMaskedTextField extends VTextField implements KeyDownHandler,
 	}
 
 	@Override
-	public void updateFromUIDL(UIDL uidl, ApplicationConnection client) {
-		setMask(uidl.getStringAttribute("mask"));
-		super.updateFromUIDL(uidl, client);
-	}
-
-	@Override
 	public void setText(String value) {
 		string = new StringBuilder(value);
 		super.setText(value);
 	}
 
-	private void setMask(String mask) {
+	public void setMask(String mask) {
 		this.mask = mask;
 		string = new StringBuilder();
 		maskTest = new ArrayList<Mask>();

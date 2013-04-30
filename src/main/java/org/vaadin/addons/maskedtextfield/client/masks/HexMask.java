@@ -1,4 +1,4 @@
-package org.vaadin.addons.maskedtextfield.gwt.client.masks;
+package org.vaadin.addons.maskedtextfield.client.masks;
 
 /**
  * Represents a hex character, 0-9a-fA-F. a-f is mapped to A-F
