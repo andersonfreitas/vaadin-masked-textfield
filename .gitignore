@@ -5,6 +5,7 @@ build/*
 gwt/*
 bin/
 src/test
+src/rebel.xml
 src/main/webapp
 dist/*
 /target
