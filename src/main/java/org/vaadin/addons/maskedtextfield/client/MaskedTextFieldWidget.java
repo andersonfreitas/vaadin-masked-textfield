@@ -1,6 +1,7 @@
 package org.vaadin.addons.maskedtextfield.client;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.vaadin.addons.maskedtextfield.client.masks.AlphanumericMask;
@@ -15,6 +16,8 @@ import org.vaadin.addons.maskedtextfield.client.masks.WildcardMask;
 
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -25,12 +28,34 @@ import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.vaadin.client.ui.VTextField;
 
 public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
-		FocusHandler, BlurHandler, KeyPressHandler {
+		FocusHandler, BlurHandler, KeyPressHandler, ClickHandler {
 
 	protected String mask;
+	
 	private char placeholder = '_';
+	
 	private StringBuilder string;
 	private List<Mask> maskTest;
+	private List<Integer> nullablePositions;
+	
+	private char emptyChar ='\0';
+	
+	/**
+	 * Key press that might be ignored by event handlers
+	 */
+	private char[] ignoredKeys = new char[] {
+			KeyCodes.KEY_BACKSPACE,
+			KeyCodes.KEY_TAB,
+			KeyCodes.KEY_DELETE,  
+			KeyCodes.KEY_END,
+			KeyCodes.KEY_ENTER,
+			KeyCodes.KEY_ESCAPE,
+			KeyCodes.KEY_HOME,
+			KeyCodes.KEY_LEFT,
+			KeyCodes.KEY_PAGEDOWN,
+			KeyCodes.KEY_PAGEUP,
+			KeyCodes.KEY_RIGHT
+	};
 
 	public MaskedTextFieldWidget() {
 		super();
@@ -38,6 +63,8 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 		addKeyDownHandler(this);
 		addFocusHandler(this);
 		addBlurHandler(this);
+		//addClickHandler(this);
+		Arrays.sort(ignoredKeys);
 	}
 
 	@Override
@@ -50,8 +77,13 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 		this.mask = mask;
 		string = new StringBuilder();
 		maskTest = new ArrayList<Mask>();
+		nullablePositions = new ArrayList<Integer>();
 		configureUserView();
 		getNextPosition(-1);
+	}
+	
+	public void setPlaceHolder(char placeHolder) {
+		this.placeholder = placeHolder;
 	}
 
 	private void configureUserView() {
@@ -63,32 +95,40 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 	}
 
 	private void createCorrectMaskAndPlaceholder(char character, int index) {
-		if (character == '\'') {
+		switch (character) {
+		case '\'':
 			addMaskStrategyAndCharacterPlaceHolder(null, mask.charAt(++index));
-		} else if (character == '#') {
-			addMaskStrategyAndCharacterPlaceHolder(new NumericMask(),
-					placeholder);
-		} else if (character == 'U') {
-			addMaskStrategyAndCharacterPlaceHolder(new UpperCaseMask(),
-					placeholder);
-		} else if (character == 'L') {
-			addMaskStrategyAndCharacterPlaceHolder(new LowerCaseMask(),
-					placeholder);
-		} else if (character == '?') {
-			addMaskStrategyAndCharacterPlaceHolder(new LetterMask(),
-					placeholder);
-		} else if (character == 'A') {
-			addMaskStrategyAndCharacterPlaceHolder(new AlphanumericMask(),
-					placeholder);
-		} else if (character == '*') {
-			addMaskStrategyAndCharacterPlaceHolder(new WildcardMask(),
-					placeholder);
-		} else if (character == 'H') {
+			break;
+		case '#':
+			addMaskStrategyAndCharacterPlaceHolder(new NumericMask(),placeholder);
+			break;
+		case 'U':
+			addMaskStrategyAndCharacterPlaceHolder(new UpperCaseMask(), placeholder);
+			break;
+		case 'L':
+			addMaskStrategyAndCharacterPlaceHolder(new LowerCaseMask(), placeholder);
+			break;
+		case '?':
+			addMaskStrategyAndCharacterPlaceHolder(new LetterMask(), placeholder);
+			break;
+		case 'A':
+			addMaskStrategyAndCharacterPlaceHolder(new AlphanumericMask(), placeholder);
+			break;
+		case '*':
+			addMaskStrategyAndCharacterPlaceHolder(new WildcardMask(), placeholder);
+			break;
+		case 'H':
 			addMaskStrategyAndCharacterPlaceHolder(new HexMask(), placeholder);
-		} else if (character == '~') {
+			break;
+		case '~':
 			addMaskStrategyAndCharacterPlaceHolder(new SignMask(), placeholder);
-		} else {
+			break;
+		case '+':
+			nullablePositions.add(index++);
+			break;
+		default:
 			addMaskStrategyAndCharacterPlaceHolder(null, character);
+			break;
 		}
 	}
 
@@ -119,39 +159,52 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 	public void onKeyPress(KeyPressEvent event) {
 		if (!isKeyIgnored(event)) {
 			if (getCursorPos() < maskTest.size()) {
-				validateAndShoywUserInput(event);
+				validateAndShowUserInput(event);
+			} else {
+				if(event.getCharCode() != emptyChar) {
+					cancelKey();
+				}
 			}
 		}
+		setCursorPositionOnFirstPlaceHolder();
 	}
 
 	private boolean isKeyIgnored(KeyPressEvent event) {
-		return event.getCharCode() == KeyCodes.KEY_BACKSPACE
-				|| event.getCharCode() == KeyCodes.KEY_TAB
-				|| event.getCharCode() == KeyCodes.KEY_DELETE
-				|| event.getCharCode() == KeyCodes.KEY_END
-				|| event.getCharCode() == KeyCodes.KEY_ENTER
-				|| event.getCharCode() == KeyCodes.KEY_ESCAPE
-				|| event.getCharCode() == KeyCodes.KEY_HOME
-				|| event.getCharCode() == KeyCodes.KEY_LEFT
-				|| event.getCharCode() == KeyCodes.KEY_PAGEDOWN
-				|| event.getCharCode() == KeyCodes.KEY_PAGEUP
-				|| event.getCharCode() == KeyCodes.KEY_RIGHT
-				|| event.isAnyModifierKeyDown();
+		return (
+				event.getCharCode() == emptyChar ||
+				event.isShiftKeyDown() && isAnySelectionTextModifiedKey(event.getCharCode()) ||
+				isIgnoredKey(event.getCharCode()) ||
+				isPasteShorcutPressed(event) ||
+				event.isAnyModifierKeyDown() && !event.isShiftKeyDown()
+				);
+	}
+	
+	private boolean isIgnoredKey(char charCode) {
+		return Arrays.binarySearch(ignoredKeys, charCode) >= 0;
+	}
+	
+	private boolean isAnySelectionTextModifiedKey(char charCode) {
+		return (charCode == KeyCodes.KEY_END || charCode == KeyCodes.KEY_HOME);
+	}
+	
+	private boolean isPasteShorcutPressed(KeyPressEvent event) {
+		return event.isControlKeyDown() && (Character.toLowerCase(event.getCharCode()) == 'v');
 	}
 
-	private void validateAndShoywUserInput(KeyPressEvent event) {
+	private void validateAndShowUserInput(KeyPressEvent event) {
 		Mask maskStrategy = maskTest.get(getCursorPos());
 		if (maskStrategy != null) {
-			if (maskStrategy.isValid(event.getCharCode())) {
+			if(event.getCharCode() == ' ' && nullablePositions.contains(getCursorPos())) {
+				showUserInput(' ');
+			}
+			else if (maskStrategy.isValid(event.getCharCode())) {
 				char character = maskStrategy.getChar(event.getCharCode());
 				showUserInput(character);
-				event.preventDefault();
 			}
-		} else {
-			setCursorPos(getNextPosition(getCursorPos()));
-		}		
+			event.preventDefault();
+		}
 	}
-
+	
 	private void showUserInput(char character) {
 		int currentPosition = getCursorPos();
 		string.setCharAt(currentPosition, character);
@@ -162,10 +215,9 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 	@Override
 	public void onKeyDown(KeyDownEvent event) {
 		if (event.getNativeKeyCode() == KeyCodes.KEY_BACKSPACE) {
-			deleteCharacterAndPositionCursor(event,
-					getPreviousPosition(getCursorPos()));
+			deleteTextOnKeyDown(event);
 		} else if (event.getNativeKeyCode() == KeyCodes.KEY_DELETE) {
-			deleteCharacterAndPositionCursor(event, getCursorPos());
+			deleteTextOnKeyDown(event);
 		} else if (event.getNativeKeyCode() == KeyCodes.KEY_RIGHT) {
 			setCursorPositionAndPreventDefault(event,getNextPosition(getCursorPos()));
 		} else if (event.getNativeKeyCode() == KeyCodes.KEY_LEFT) {
@@ -180,9 +232,25 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 			super.onKeyDown(event);
 		}
 	}
+	
+	private void deleteTextOnKeyDown(KeyDownEvent event) {
+		if(!getSelectedText().isEmpty()) {
+			String selected = getSelectedText();
+			for(int i=(selected.length()-1); i>=0; i--) {
+				int index = getText().indexOf(selected.charAt(i));
+				deleteCharacter(index);
+			}
+			setCursorPositionOnFirstPlaceHolder();
+		} else {
+			if(event.getNativeKeyCode() == KeyCodes.KEY_DELETE) {
+				deleteCharacterAndPositionCursor(event, getCursorPos());
+			} else {
+				deleteCharacterAndPositionCursor(event, getPreviousPosition(getCursorPos()));
+			}
+		}
+	}
 
-	private void deleteCharacterAndPositionCursor(KeyDownEvent event,
-			int position) {
+	private void deleteCharacterAndPositionCursor(KeyDownEvent event, int position) {
 		deleteCharacter(position);
 		setCursorPositionAndPreventDefault(event, position);
 	}
@@ -203,8 +271,18 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 	public void onFocus(FocusEvent event) {
 		if (getValue().isEmpty()) {
 			setMask(mask);
-		} else
-			setCursorPos(getPreviousPosition(0));
+		}
+		setCursorPositionOnFirstPlaceHolder();
+	}
+	
+	private void setCursorPositionOnFirstPlaceHolder() {
+		for(int i=0; i<mask.length(); i++) {
+			char character = getValue().charAt(i);
+			if(character == placeholder) {
+				setCursorPos(i);
+				break;
+			}
+		}
 	}
 
 	public void onBlur(BlurEvent event) {
@@ -216,5 +294,10 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 				return;
 			}
 		}
+	}
+
+	@Override
+	public void onClick(ClickEvent event) {
+		setCursorPositionOnFirstPlaceHolder();
 	}
 }

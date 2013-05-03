@@ -13,6 +13,7 @@ public class MaskedTextField extends TextField {
 	private static final long serialVersionUID = 1L;
 
 	public MaskedTextField() {
+		super();
 	}
 
 	public MaskedTextField(String caption) {
@@ -38,6 +39,14 @@ public class MaskedTextField extends TextField {
 	
 	public void setMask(String mask) {
 		getState().mask = mask;
+	}
+	
+	public char getPlaceHolder() {
+		return getState().placeHolder;
+	}
+	
+	public void setPlaceHolder(char placeHolder) {
+		getState().placeHolder = placeHolder;
 	}
 
 	@Override
