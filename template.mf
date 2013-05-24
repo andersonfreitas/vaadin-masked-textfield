@@ -6,6 +6,6 @@ Excluded-Imports:
  com.google.gwt*,
  com.vaadin.client.*
 Excluded-Exports: 
- org.vaadin.addons.maskedtextfield.client
+ org.vaadin.addons.maskedtextfield.client.*
 Import-Template:
  com.vaadin.*;version="[7.0.0, 8.0.0)"
