@@ -1,6 +1,6 @@
 package org.vaadin.addons.maskedtextfield.client;
 
-import org.vaadin.addons.maskedtextfield.CurrencyField;
+import org.vaadin.addons.maskedtextfield.DecimalField;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Widget;
@@ -8,24 +8,24 @@ import com.vaadin.client.communication.StateChangeEvent;
 import com.vaadin.client.ui.textfield.TextFieldConnector;
 import com.vaadin.shared.ui.Connect;
 
-@Connect(CurrencyField.class)
-public class CurrencyFieldConnector extends TextFieldConnector {
+@Connect(DecimalField.class)
+public class DecimalFieldConnector extends TextFieldConnector {
 
 	private static final long serialVersionUID = 1L;
 
 	@Override
 	protected Widget createWidget() {
-		return GWT.create(CurrencyFieldWidget.class);
+		return GWT.create(DecimalFieldWidget.class);
 	}
 	
 	@Override
-	public CurrencyFieldWidget getWidget() {
-		return (CurrencyFieldWidget) super.getWidget();
+	public DecimalFieldWidget getWidget() {
+		return (DecimalFieldWidget) super.getWidget();
 	}
 
 	@Override
-	public CurrencyFieldState getState() {
-		return (CurrencyFieldState) super.getState();
+	public DecimalFieldState getState() {
+		return (DecimalFieldState) super.getState();
 	}
 
 	@Override

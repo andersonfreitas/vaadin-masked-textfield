@@ -19,7 +19,7 @@ import com.vaadin.client.ui.VTextField;
  * @author Eduardo Frazao
  *
  */
-public class CurrencyFieldWidget extends VTextField implements KeyPressHandler, BlurHandler {
+public class DecimalFieldWidget extends VTextField implements KeyPressHandler, BlurHandler {
 	
 	
 	private char decimalSeparator;
@@ -49,7 +49,7 @@ public class CurrencyFieldWidget extends VTextField implements KeyPressHandler, 
 		Arrays.sort(acceptedCharSet);
 	}
 	
-	public CurrencyFieldWidget() {
+	public DecimalFieldWidget() {
 		setAlignment(TextAlignment.RIGHT);
 		
 		addKeyPressHandler(this);

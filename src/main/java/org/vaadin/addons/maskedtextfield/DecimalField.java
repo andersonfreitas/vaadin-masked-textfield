@@ -5,43 +5,43 @@ import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.util.Locale;
 
-import org.vaadin.addons.maskedtextfield.client.CurrencyFieldState;
+import org.vaadin.addons.maskedtextfield.client.DecimalFieldState;
 import org.vaadin.addons.maskedtextfield.shared.Utils;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.util.converter.StringToNumberConverter;
 import com.vaadin.ui.TextField;
 
-public class CurrencyField extends TextField {
+public class DecimalField extends TextField {
 
 	private static final long serialVersionUID = 1L;
 
-	public CurrencyField() {
+	public DecimalField() {
 		super();
 		setConverter(new MaskNumberConverter());
 	}
 
-	public CurrencyField(Property<?> dataSource) {
+	public DecimalField(Property<?> dataSource) {
 		super(dataSource);
 		setConverter(new MaskNumberConverter());
 	}
 
-	public CurrencyField(String caption, Property<?> dataSource) {
+	public DecimalField(String caption, Property<?> dataSource) {
 		super(caption, dataSource);
 		setConverter(new MaskNumberConverter());
 	}
 
-	public CurrencyField(String caption, String value) {
+	public DecimalField(String caption, String value) {
 		super(caption, value);
 		setConverter(new MaskNumberConverter());
 	}
 
-	public CurrencyField(String caption) {
+	public DecimalField(String caption) {
 		super(caption);
 		setConverter(new MaskNumberConverter());
 	}
 	
-	public CurrencyField(String mask, char decimalSeparator, char groupingSeparator) {
+	public DecimalField(String mask, char decimalSeparator, char groupingSeparator) {
 		this();
 		setMask(mask);
 		setDecimalSeparator(decimalSeparator);
@@ -79,8 +79,8 @@ public class CurrencyField extends TextField {
 	}
 	
 	@Override
-	public CurrencyFieldState getState() {
-		return (CurrencyFieldState) super.getState();
+	public DecimalFieldState getState() {
+		return (DecimalFieldState) super.getState();
 	}
 	
 	@SuppressWarnings("rawtypes")
