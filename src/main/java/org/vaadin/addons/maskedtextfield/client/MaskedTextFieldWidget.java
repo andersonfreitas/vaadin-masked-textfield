@@ -14,10 +14,9 @@ import org.vaadin.addons.maskedtextfield.client.masks.SignMask;
 import org.vaadin.addons.maskedtextfield.client.masks.UpperCaseMask;
 import org.vaadin.addons.maskedtextfield.client.masks.WildcardMask;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -25,12 +24,14 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.user.client.Event;
 import com.vaadin.client.ui.VTextField;
 
 public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
-		FocusHandler, BlurHandler, KeyPressHandler, ClickHandler {
+		FocusHandler, BlurHandler, KeyPressHandler {
 
 	protected String mask;
+	private String proccessedMask;
 	
 	private char placeholder = '_';
 	
@@ -59,24 +60,26 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 
 	public MaskedTextFieldWidget() {
 		super();
+		Arrays.sort(ignoredKeys);
 		addKeyPressHandler(this);
 		addKeyDownHandler(this);
 		addFocusHandler(this);
 		addBlurHandler(this);
-		//addClickHandler(this);
-		Arrays.sort(ignoredKeys);
+		sinkEvents(Event.ONPASTE);
 	}
 
 	@Override
 	public void setText(String value) {
-		string = new StringBuilder(value);
-		super.setText(value);
+		String v = formatString(value);
+		string = new StringBuilder(v);
+		super.setText(isFieldIfIncomplete() ? "" : v);
+		valueChange(false);
 	}
 
 	public void setMask(String mask) {
 		this.mask = mask;
 		string = new StringBuilder();
-		maskTest = new ArrayList<Mask>();
+		maskTest = new ArrayList<Mask>(mask.length());
 		nullablePositions = new ArrayList<Integer>();
 		configureUserView();
 		getNextPosition(-1);
@@ -91,7 +94,9 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 			char character = mask.charAt(index);
 			createCorrectMaskAndPlaceholder(character, index);
 		}
-		setValue(string.toString());
+		proccessedMask = string.toString(); 
+		super.setText(proccessedMask);
+		valueChange(false);
 	}
 
 	private void createCorrectMaskAndPlaceholder(char character, int index) {
@@ -132,8 +137,7 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 		}
 	}
 
-	private void addMaskStrategyAndCharacterPlaceHolder(Mask maskStrategy,
-			char characterPlaceholder) {
+	private void addMaskStrategyAndCharacterPlaceHolder(Mask maskStrategy, char characterPlaceholder) {
 		maskTest.add(maskStrategy);
 		string.append(characterPlaceholder);
 	}
@@ -153,7 +157,7 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 	}
 
 	private int getLastPosition() {
-		return getValue().length() + 1;
+		return getText().length() + 1;
 	}
 
 	public void onKeyPress(KeyPressEvent event) {
@@ -166,7 +170,6 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 				}
 			}
 		}
-		setCursorPositionOnFirstPlaceHolder();
 	}
 
 	private boolean isKeyIgnored(KeyPressEvent event) {
@@ -192,7 +195,7 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 	}
 
 	private void validateAndShowUserInput(KeyPressEvent event) {
-		Mask maskStrategy = maskTest.get(getCursorPos());
+		Mask maskStrategy = maskTest.get(getAvaliableCursorPos(getCursorPos()));
 		if (maskStrategy != null) {
 			if(event.getCharCode() == ' ' && nullablePositions.contains(getCursorPos())) {
 				showUserInput(' ');
@@ -205,11 +208,67 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 		}
 	}
 	
+	@Override 
+	public void onBrowserEvent(Event event) { 
+	    if(event.getTypeInt() == Event.ONPASTE) {
+	    	super.setText("");
+	    	super.onBrowserEvent(event);
+	    	Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+				@Override
+				public void execute() {
+					formatPaste();
+				}
+			});
+	    	
+	    } else {
+	    	super.onBrowserEvent(event);
+	    }
+	} 
+	
+	private void formatPaste() {
+		setText(formatString(super.getText()));
+	}
+	
+	private String formatString(final String value) {
+		if(value == null || value.trim().isEmpty()) {
+			return "";
+		}
+		StringBuilder sb = new StringBuilder(proccessedMask);
+		int valueIndex = 0;
+		char[] valueChars = value.toCharArray();
+		for(int i=0; i<maskTest.size(); i++) {
+			Mask maskStrategy = maskTest.get(i);
+			if(maskStrategy != null) {
+				if(valueIndex<valueChars.length) {
+					while(valueIndex<valueChars.length) {
+						char s = valueChars[valueIndex++];
+						if(nullablePositions.contains(i) || maskStrategy.isValid(s)) {
+							if(s == ' ') {
+								sb.setCharAt(i, ' ');
+							} else {
+								sb.setCharAt(i, maskStrategy.getChar(s));
+							}
+							break;
+						}
+					}
+				}
+			}
+		}
+		return sb.toString();
+	}
+	
 	private void showUserInput(char character) {
-		int currentPosition = getCursorPos();
+		if(getText().isEmpty()) {
+			configureUserView();
+		}
+		if(getText().length() < maskTest.size()) {
+			
+		}
+		int currentPosition = getAvaliableCursorPos(getCursorPos());
 		string.setCharAt(currentPosition, character);
-		setValue(string.toString());
+		super.setText(string.toString());
 		setCursorPos(getNextPosition(currentPosition));
+		valueChange(false);
 	}
 
 	@Override
@@ -222,25 +281,22 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 			setCursorPositionAndPreventDefault(event,getNextPosition(getCursorPos()));
 		} else if (event.getNativeKeyCode() == KeyCodes.KEY_LEFT) {
 			setCursorPositionAndPreventDefault(event, getPreviousPosition(getCursorPos()));
-		} else if (event.getNativeKeyCode() == KeyCodes.KEY_HOME
-				|| event.getNativeKeyCode() == KeyCodes.KEY_UP) {
+		} else if (event.getNativeKeyCode() == KeyCodes.KEY_HOME && !event.isShiftKeyDown()) {
 			setCursorPositionAndPreventDefault(event, getPreviousPosition(0));
-		} else if (event.getNativeKeyCode() == KeyCodes.KEY_END
-				|| event.getNativeKeyCode() == KeyCodes.KEY_DOWN) {
+		} else if (event.getNativeKeyCode() == KeyCodes.KEY_END && !event.isShiftKeyDown()) {
 			setCursorPositionAndPreventDefault(event, getLastPosition());
-		} else {
-			super.onKeyDown(event);
 		}
+		super.onKeyDown(event);
 	}
 	
 	private void deleteTextOnKeyDown(KeyDownEvent event) {
 		if(!getSelectedText().isEmpty()) {
 			String selected = getSelectedText();
 			for(int i=(selected.length()-1); i>=0; i--) {
-				int index = getText().indexOf(selected.charAt(i));
+				int index = getText().indexOf(Character.toString(selected.charAt(i)));
 				deleteCharacter(index);
 			}
-			setCursorPositionOnFirstPlaceHolder();
+			setCursorPos(0);
 		} else {
 			if(event.getNativeKeyCode() == KeyCodes.KEY_DELETE) {
 				deleteCharacterAndPositionCursor(event, getCursorPos());
@@ -264,40 +320,45 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 		Mask maskStrategy = maskTest.get(position);
 		if (maskStrategy != null) {
 			string.setCharAt(position, placeholder);
-			setValue(string.toString());
+			super.setText(string.toString());
+			valueChange(false);
 		}
 	}
 
 	public void onFocus(FocusEvent event) {
-		if (getValue().isEmpty()) {
+		if (getText().isEmpty()) {
 			setMask(mask);
+			setCursorPos(getAvaliableCursorPos(0));
 		}
-		setCursorPositionOnFirstPlaceHolder();
 	}
 	
-	private void setCursorPositionOnFirstPlaceHolder() {
-		for(int i=0; i<mask.length(); i++) {
-			char character = getValue().charAt(i);
-			if(character == placeholder) {
-				setCursorPos(i);
+	public int getAvaliableCursorPos(int desiredPosition) {
+		int i = desiredPosition;
+		for(;i<maskTest.size(); i++) {
+			if(maskTest.get(i) != null) {
 				break;
 			}
 		}
+		return i;
 	}
 
 	public void onBlur(BlurEvent event) {
+		if(isFieldIfIncomplete()) {
+			super.setText("");
+			valueChange(true);
+		} else {
+			super.onBlur(event);
+		}
+	}
+	
+	private boolean isFieldIfIncomplete() {
 		for (int index = 0; index < string.length(); index++) {
 			char character = string.charAt(index);
 			if (maskTest.get(index) != null && character == placeholder) {
-				setValue("");
-				valueChange(true);
-				return;
+				return true;
 			}
 		}
+		return false;
 	}
-
-	@Override
-	public void onClick(ClickEvent event) {
-		setCursorPositionOnFirstPlaceHolder();
-	}
+	
 }
