@@ -3,4 +3,12 @@ WebContent/VAADIN/*
 build/*
 .DS_STORE
 gwt/*
+bin/
+src/test
+src/rebel.xml
+src/main/webapp
 dist/*
+/target
+.settings/
+.project
+.classpath

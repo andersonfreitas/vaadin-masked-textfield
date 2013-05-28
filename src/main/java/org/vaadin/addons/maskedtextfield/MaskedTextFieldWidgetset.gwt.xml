@@ -1,0 +1,42 @@
+<module>
+	<!--
+	    This file is automatically updated based on new dependencies by the
+	    goal "vaadin:update-widgetset".
+	-->
+
+	<!-- Inherit DefaultWidgetSet -->
+	<inherits name="com.vaadin.DefaultWidgetSet" />	 
+
+    <!--
+     Uncomment the following to compile the widgetset for one browser only.
+     This can reduce the GWT compilation time significantly when debugging.
+     The line should be commented out before deployment to production
+     environments.
+      
+     Multiple browsers can be specified for GWT 2.0.3 as a comma separated
+     list. The supported user agents at the moment of writing were:
+     ie6,ie8,gecko,gecko1_8,safari,opera
+     
+     The value gecko1_8 is used for Firefox 3 and later and safari is used
+     for webkit based browsers including Google Chrome.
+    -->
+  	
+
+    
+    
+     <!--
+     To enable SuperDevMode, uncomment this line.
+     
+     SuperDevMode enables debugging of the client side of a Vaadin
+     application using the JavaScript debugger of a browser. Java code is
+     shown and debugging can take place on the Java level when using a browser
+     that support source maps (currently Chrome, implementation under work
+     for Firefox).
+     
+     After uncommenting this property, run compile the widgetset once and run
+     mvn jetty:run for the server-side. Then run mvn vaadin:run-codeserver and 
+     add ?superdevmode to your application URL to activate SuperDevMode.
+     -->
+    <set-configuration-property name="devModeRedirectEnabled" value="true" />
+
+</module>
