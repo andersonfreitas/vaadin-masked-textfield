@@ -1,7 +1,12 @@
-MaskedTextField for Vaadin
-=========================================
+# MaskedTextField for Vaadin
 
-For more information please checkout http://vaadin.com/addon/maskedtextfield
+This component is listed on [Vaadin Library](http://vaadin.com/addon/maskedtextfield)
+
+It is fully compatible with the OSGI architecture of Vaadin 7
+
+
+
+
 
 Overview of currently available masks:
 
