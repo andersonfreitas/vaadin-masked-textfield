@@ -41,6 +41,8 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 	
 	private char emptyChar ='\0';
 	
+	private boolean immediate = false;
+	
 	/**
 	 * Key press that might be ignored by event handlers
 	 */
@@ -285,8 +287,13 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 			setCursorPositionAndPreventDefault(event, getPreviousPosition(0));
 		} else if (event.getNativeKeyCode() == KeyCodes.KEY_END && !event.isShiftKeyDown()) {
 			setCursorPositionAndPreventDefault(event, getLastPosition());
+		} else if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+			if(!isFieldIfIncomplete()) {
+				super.onKeyDown(event);
+			}
+		} else {
+			super.onKeyDown(event);
 		}
-		super.onKeyDown(event);
 	}
 	
 	private void deleteTextOnKeyDown(KeyDownEvent event) {
@@ -340,6 +347,31 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 			}
 		}
 		return i;
+	}
+
+	@Override
+	protected boolean updateCursorPosition() {
+		if(!isImmediate()) {
+			return super.updateCursorPosition();
+		}
+		return false;
+	}
+
+	@Override
+	public void setImmediate(boolean immediate) {
+		super.setImmediate(immediate);
+		this.immediate = true;
+	}
+	
+	private boolean isImmediate() {
+		return immediate;
+	}
+	
+	@Override
+	public void valueChange(boolean blurred) {
+		if(!isFieldIfIncomplete()) {
+			super.valueChange(blurred);
+		}
 	}
 
 	public void onBlur(BlurEvent event) {
