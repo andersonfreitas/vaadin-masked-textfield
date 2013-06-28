@@ -332,10 +332,16 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 		}
 	}
 
+	@Override
 	public void onFocus(FocusEvent event) {
 		if (getText().isEmpty()) {
 			setMask(mask);
-			setCursorPos(getAvaliableCursorPos(0));
+			Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+				@Override
+				public void execute() {
+					setCursorPos(getAvaliableCursorPos(0));
+				}
+			});
 		}
 	}
 	
