@@ -52,12 +52,14 @@ public class MaskedTextField extends TextField {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void setPropertyDataSource(Property newDataSource) {
-		super.setPropertyDataSource(newDataSource);
-		if(Number.class.isAssignableFrom(newDataSource.getType())) {
-			validateNumberPropertyWithMask();
-			setConverter(new MaskNumberConverter());
-		} else if (char.class.isAssignableFrom(newDataSource.getType()) || String.class.isAssignableFrom(newDataSource.getType())) {
-			setConverter(new UnmaskModelConverter(this));
+		if(newDataSource != null) {
+			super.setPropertyDataSource(newDataSource);
+			if(Number.class.isAssignableFrom(newDataSource.getType())) {
+				validateNumberPropertyWithMask();
+				setConverter(new MaskNumberConverter());
+			} else if (char.class.isAssignableFrom(newDataSource.getType()) || String.class.isAssignableFrom(newDataSource.getType())) {
+				setConverter(new UnmaskModelConverter(this));
+			}
 		}
 	}
 	
