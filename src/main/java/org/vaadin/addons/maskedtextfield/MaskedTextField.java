@@ -52,12 +52,14 @@ public class MaskedTextField extends TextField {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void setPropertyDataSource(Property newDataSource) {
-		super.setPropertyDataSource(newDataSource);
-		if(Number.class.isAssignableFrom(newDataSource.getType())) {
-			validateNumberPropertyWithMask();
-			setConverter(new MaskNumberConverter());
-		} else if (char.class.isAssignableFrom(newDataSource.getType()) || String.class.isAssignableFrom(newDataSource.getType())) {
-			setConverter(new UnmaskModelConverter(this));
+		if(newDataSource != null) {
+			super.setPropertyDataSource(newDataSource);
+			if(Number.class.isAssignableFrom(newDataSource.getType())) {
+				validateNumberPropertyWithMask();
+				setConverter(new MaskNumberConverter());
+			} else if (char.class.isAssignableFrom(newDataSource.getType()) || String.class.isAssignableFrom(newDataSource.getType())) {
+				setConverter(new UnmaskModelConverter(this));
+			}
 		}
 	}
 	
@@ -129,11 +131,11 @@ public class MaskedTextField extends TextField {
 		private static final long serialVersionUID = 1L;
 		
 		@Override
-		public Number convertToModel(String value, Locale locale) throws ConversionException {
+		public Number convertToModel(String value, Class<? extends Number> targetType, Locale locale) throws ConversionException {
 			String unmasked = unmask(value);
 			if(unmasked != null) {
 				try {
-					Number n = super.convertToModel(unmasked, locale);
+					Number n = super.convertToModel(unmasked, targetType, locale);
 					return Utils.convertToDataSource(n, getPropertyDataSource());
 				} catch (NumberFormatException ne) {
 					return Utils.convertToDataSource(0, getPropertyDataSource());
@@ -141,6 +143,7 @@ public class MaskedTextField extends TextField {
 			}
 			return Utils.convertToDataSource(0, getPropertyDataSource());
 		}
+		
 	}
 	
 	/**
@@ -157,14 +160,13 @@ public class MaskedTextField extends TextField {
 		public UnmaskModelConverter(MaskedTextField field) {
 			this.field = field;
 		}
-		
 		@Override
-		public String convertToModel(String value, Locale locale) throws com.vaadin.data.util.converter.Converter.ConversionException {
+		public String convertToModel(String value, Class<? extends String> targetType, Locale locale) throws ConversionException {
 			return value;
 		}
 
 		@Override
-		public String convertToPresentation(String value, Locale locale) throws com.vaadin.data.util.converter.Converter.ConversionException {
+		public String convertToPresentation(String value, Class<? extends String> targetType, Locale locale) throws ConversionException {
 			if(field.isMaskClientOnly()) {
 				String unmasked = field.unmask(value);
 				if(unmasked != null) {

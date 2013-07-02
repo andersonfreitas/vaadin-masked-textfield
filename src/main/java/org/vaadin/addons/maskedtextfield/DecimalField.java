@@ -122,8 +122,9 @@ public class DecimalField extends TextField {
 			}
 		}
 		
+		
 		@Override
-		public Number convertToModel(String value, Locale locale) throws ConversionException {
+		public Number convertToModel(String value, Class<? extends Number> targetType, Locale locale) throws ConversionException {
 			refreshFormatter();
 			try {
 				if(value == null || value.trim().isEmpty()) {
@@ -140,8 +141,11 @@ public class DecimalField extends TextField {
 		}
 
 		@Override
-		public String convertToPresentation(Number value, Locale locale) throws ConversionException {
-			return formatter.format(value);
+		public String convertToPresentation(Number value, Class<? extends String> targetType, Locale locale) throws ConversionException {
+			if(value != null) {
+				return formatter.format(value);
+			}
+			return null;
 		}
 
 	}
