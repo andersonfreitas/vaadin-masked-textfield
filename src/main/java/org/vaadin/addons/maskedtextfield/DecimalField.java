@@ -86,10 +86,12 @@ public class DecimalField extends TextField {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void setPropertyDataSource(Property newDataSource) {
-		if(!Number.class.isAssignableFrom(newDataSource.getType())) {
-			throw new IllegalArgumentException("This field is compatible with number datasources only");
+		if(newDataSource != null) {
+			if(!Number.class.isAssignableFrom(newDataSource.getType())) {
+				throw new IllegalArgumentException("This field is compatible with number datasources only");
+			}
+			super.setPropertyDataSource(newDataSource);
 		}
-		super.setPropertyDataSource(newDataSource);
 	}
 
 	/**

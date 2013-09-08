@@ -138,13 +138,6 @@ public class DecimalFieldWidget extends VTextField implements KeyPressHandler, B
 	    String str = value == null ? getText() : value;
 	    if(!str.trim().isEmpty()) {
 	    	double amount = readDoubleFromFormattedValue(value);
-	    	/*
-	    	if(value == null) {
-	    		amount = readDoubleFromFormattedValue(value);
-	    	} else {
-	    		amount = parseDouble(value);
-	    	}
-	    	*/
 	  	    return replaceSeparators(formatter.format(amount));
 	    } 
 	    return str;
@@ -227,7 +220,11 @@ public class DecimalFieldWidget extends VTextField implements KeyPressHandler, B
 	
 	@Override
 	public void setText(String value) {
-		refreshValue(value);
+		if(value == null) {
+			super.setText(null);
+		} else {
+			refreshValue(value);
+		}
 	}
 	
 }
