@@ -10,7 +10,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<vaadin.version>7.1.4</vaadin.version>
+		<vaadin.version>7.1.8</vaadin.version>
 		<vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
 		<bundlor.manifest.output.dir>target/classes</bundlor.manifest.output.dir>
 	</properties>
@@ -254,7 +254,7 @@
 											vaadin-maven-plugin
 										</artifactId>
 										<versionRange>
-											[7.0.2,)
+											[7.1.0,)
 										</versionRange>
 										<goals>
 											<goal>

@@ -9,6 +9,6 @@ src/rebel.xml
 src/main/webapp
 dist/*
 /target
-.settings/
+.settings
 .project
 .classpath
