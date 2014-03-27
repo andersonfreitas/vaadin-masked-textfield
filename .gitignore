@@ -1,4 +1,5 @@
 *.class
+*.iml
 WebContent/VAADIN/*
 build/*
 .DS_STORE
@@ -12,3 +13,4 @@ dist/*
 .settings/
 .project
 .classpath
+.idea
