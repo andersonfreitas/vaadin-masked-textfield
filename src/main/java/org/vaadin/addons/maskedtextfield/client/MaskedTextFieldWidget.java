@@ -13,6 +13,7 @@ import org.vaadin.addons.maskedtextfield.client.masks.NumericMask;
 import org.vaadin.addons.maskedtextfield.client.masks.SignMask;
 import org.vaadin.addons.maskedtextfield.client.masks.UpperCaseMask;
 import org.vaadin.addons.maskedtextfield.client.masks.WildcardMask;
+import org.vaadin.addons.maskedtextfield.shared.Constants;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -72,31 +73,47 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 
 	@Override
 	public void setText(String value) {
+		setText(value, true);
+	}
+	
+	protected void setText(String value, boolean checkComplete) {
 		String v = formatString(value);
 		string = new StringBuilder(v);
-		super.setText(isFieldIfIncomplete() ? "" : v);
+		super.setText((checkComplete && isFieldIfIncomplete()) ? "" : v);
 		valueChange(false);
 	}
 
 	public void setMask(String mask) {
+		setMask(mask, true);
+	}
+	
+	protected void setMask(String mask, boolean replaceValue) {
 		this.mask = mask;
 		string = new StringBuilder();
 		maskTest = new ArrayList<Mask>(mask.length());
 		nullablePositions = new ArrayList<Integer>();
-		configureUserView();
-		getNextPosition(-1);
+		if(replaceValue) {
+			configureUserView();
+		} else {
+			configureMask();
+		}
+		getNextPosition(0);
 	}
 	
 	public void setPlaceHolder(char placeHolder) {
 		this.placeholder = placeHolder;
 	}
 
-	private void configureUserView() {
+	private void configureMask() {
 		for (int index = 0; index < mask.length(); index++) {
 			char character = mask.charAt(index);
 			createCorrectMaskAndPlaceholder(character, index);
 		}
-		proccessedMask = string.toString(); 
+		proccessedMask = string.toString();
+	}
+	
+	private void configureUserView() {
+		configureMask();
 		super.setText(proccessedMask);
 		valueChange(false);
 	}
@@ -214,7 +231,7 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 	public void onBrowserEvent(Event event) { 
 	    if(event.getTypeInt() == Event.ONPASTE) {
 	    	super.setText("");
-	    	super.onBrowserEvent(event);
+	    	processOriginalPasteEvent(event);
 	    	Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
 				@Override
 				public void execute() {
@@ -225,13 +242,17 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 	    } else {
 	    	super.onBrowserEvent(event);
 	    }
-	} 
+	}
 	
-	private void formatPaste() {
+	protected void processOriginalPasteEvent(Event evt) {
+		super.onBrowserEvent(evt);
+	}
+	
+	protected void formatPaste() {
 		setText(formatString(super.getText()));
 	}
 	
-	private String formatString(final String value) {
+	protected String formatString(final String value) {
 		if(value == null || value.trim().isEmpty()) {
 			return "";
 		}
@@ -267,7 +288,7 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 			
 		}
 		int currentPosition = getAvaliableCursorPos(getCursorPos());
-		string.setCharAt(currentPosition, character);
+		string.setCharAt(currentPosition, character); 
 		super.setText(string.toString());
 		setCursorPos(getNextPosition(currentPosition));
 		valueChange(false);
@@ -355,6 +376,16 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 		return i;
 	}
 
+	public int getNextAvaliableCursorPos(int desiredPosition) {
+		int i = desiredPosition;
+		for(;i<maskTest.size(); i++) {
+			if(maskTest.get(i) != null && string.charAt(i) == placeholder) {
+				break;
+			}
+		}
+		return i;
+	}
+	
 	@Override
 	protected boolean updateCursorPosition() {
 		if(!isImmediate()) {
@@ -389,7 +420,10 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 		}
 	}
 	
-	private boolean isFieldIfIncomplete() {
+	protected boolean isFieldIfIncomplete() {
+		if(string == null || maskTest == null) {
+			return true;
+		}
 		for (int index = 0; index < string.length(); index++) {
 			char character = string.charAt(index);
 			if (maskTest.get(index) != null && character == placeholder) {
@@ -397,6 +431,31 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 			}
 		}
 		return false;
+	}
+	
+	protected String unmask() {
+		return unmask(super.getText());
+	}
+	
+	protected String unmask(final String value) {
+		char[] masks = Constants.MASK_REPRESENTATIONS;
+		Arrays.sort(masks);
+		if(value == null || value.trim().isEmpty()) {
+			return null;
+		}
+		StringBuilder sb = new StringBuilder(value);
+		String m = mask.replaceAll("\\+", "");
+		int removedChars = 0;
+		for(int i = 0; i<m.length(); i++) {
+			char s = m.charAt(i);
+			if(Arrays.binarySearch(masks, s) < 0) {
+				if(i < value.length() && sb.charAt(i-removedChars) == s) {
+					sb.deleteCharAt(i-removedChars);
+					removedChars++;
+				}
+			}
+		}
+		return sb.toString().replaceAll(String.valueOf(placeholder), "");
 	}
 	
 }

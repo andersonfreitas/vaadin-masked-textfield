@@ -6,7 +6,7 @@ import java.text.ParseException;
 import java.util.Locale;
 
 import org.vaadin.addons.maskedtextfield.client.DecimalFieldState;
-import org.vaadin.addons.maskedtextfield.shared.Utils;
+import org.vaadin.addons.maskedtextfield.server.Utils;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.util.converter.StringToNumberConverter;

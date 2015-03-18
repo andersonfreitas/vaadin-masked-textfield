@@ -1,4 +1,4 @@
-package org.vaadin.addons.maskedtextfield.shared;
+package org.vaadin.addons.maskedtextfield.server;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

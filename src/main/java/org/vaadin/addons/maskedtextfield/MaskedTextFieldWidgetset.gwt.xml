@@ -1,4 +1,6 @@
 <module>
+
+	
 	<!--
 	    This file is automatically updated based on new dependencies by the
 	    goal "vaadin:update-widgetset".
@@ -20,10 +22,7 @@
      The value gecko1_8 is used for Firefox 3 and later and safari is used
      for webkit based browsers including Google Chrome.
     -->
-  	
 
-    
-    
      <!--
      To enable SuperDevMode, uncomment this line.
      
@@ -37,6 +36,9 @@
      mvn jetty:run for the server-side. Then run mvn vaadin:run-codeserver and 
      add ?superdevmode to your application URL to activate SuperDevMode.
      -->
-    <set-configuration-property name="devModeRedirectEnabled" value="true" />
+<!--     <set-configuration-property name="devModeRedirectEnabled" value="true" /> -->
+    
+    <source path="client" />
+    <source path="shared" />
 
 </module>

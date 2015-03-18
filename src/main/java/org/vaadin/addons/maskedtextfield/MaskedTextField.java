@@ -4,7 +4,8 @@ import java.util.Arrays;
 import java.util.Locale;
 
 import org.vaadin.addons.maskedtextfield.client.MaskedTextFieldState;
-import org.vaadin.addons.maskedtextfield.shared.Utils;
+import org.vaadin.addons.maskedtextfield.server.Utils;
+import org.vaadin.addons.maskedtextfield.shared.Constants;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.util.converter.Converter;
@@ -18,15 +19,12 @@ public class MaskedTextField extends TextField {
 
 	private static final long serialVersionUID = 1L;
 	
-	private char[] maskRepresentations = {'#', 'U', 'L', '?', 'A', '*', 'H', '~'};
-	
 	private char digitRepresentation = '#';
 	
 	private Boolean maskClientOnly = false;
 	
 	public MaskedTextField() {
 		super();
-		Arrays.sort(maskRepresentations);
 	}
 
 	public MaskedTextField(String caption) {
@@ -66,7 +64,7 @@ public class MaskedTextField extends TextField {
 	private void validateNumberPropertyWithMask() {
 		char[] maskChars = getMask().replaceAll("\\+", "").toCharArray();
 		for(char s : maskChars) {
-			if(Arrays.binarySearch(maskRepresentations, s) >= 0 && s != digitRepresentation) {
+			if(Arrays.binarySearch(Constants.MASK_REPRESENTATIONS, s) >= 0 && s != digitRepresentation) {
 				throw new IllegalArgumentException("This mask is not compatible with numeric datasources");
 			}
 		}
@@ -102,16 +100,16 @@ public class MaskedTextField extends TextField {
 		return (MaskedTextFieldState) super.getState();
 	}
 	
-	private String unmask(final String value) {
+	protected String unmask(final String value, String mask) {
 		if(value == null || value.trim().isEmpty()) {
 			return null;
 		}
 		StringBuilder sb = new StringBuilder(value);
-		String mask = getMask().replaceAll("\\+", "");
+		mask = mask.replaceAll("\\+", "");
 		int removedChars = 0;
 		for(int i = 0; i<mask.length(); i++) {
 			char s = mask.charAt(i);
-			if(Arrays.binarySearch(maskRepresentations, s) < 0) {
+			if(Arrays.binarySearch(Constants.MASK_REPRESENTATIONS, s) < 0) {
 				if(i < value.length() && sb.charAt(i-removedChars) == s) {
 					sb.deleteCharAt(i-removedChars);
 					removedChars++;
@@ -119,6 +117,10 @@ public class MaskedTextField extends TextField {
 			}
 		}
 		return sb.toString();
+	}
+	
+	protected String unmask(final String value) {
+		return unmask(value, getMask());
 	}
 	
 	/**
