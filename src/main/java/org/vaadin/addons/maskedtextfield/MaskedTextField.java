@@ -7,9 +7,10 @@ import org.vaadin.addons.maskedtextfield.client.MaskedTextFieldState;
 import org.vaadin.addons.maskedtextfield.server.Utils;
 import org.vaadin.addons.maskedtextfield.shared.Constants;
 
+import com.ibm.icu.math.BigDecimal;
 import com.vaadin.data.Property;
+import com.vaadin.data.util.converter.AbstractStringToNumberConverter;
 import com.vaadin.data.util.converter.Converter;
-import com.vaadin.data.util.converter.StringToNumberConverter;
 import com.vaadin.ui.TextField;
 
 /**
@@ -128,7 +129,7 @@ public class MaskedTextField extends TextField {
 	 * @author Eduardo Frazao
 	 *
 	 */
-	private class MaskNumberConverter extends StringToNumberConverter {
+	private class MaskNumberConverter extends AbstractStringToNumberConverter<Number> {
 
 		private static final long serialVersionUID = 1L;
 		
@@ -137,13 +138,18 @@ public class MaskedTextField extends TextField {
 			String unmasked = unmask(value);
 			if(unmasked != null) {
 				try {
-					Number n = super.convertToModel(unmasked, targetType, locale);
+					Number n = new BigDecimal(value);
 					return Utils.convertToDataSource(n, getPropertyDataSource());
 				} catch (NumberFormatException ne) {
 					return Utils.convertToDataSource(0, getPropertyDataSource());
 				}
 			}
 			return Utils.convertToDataSource(0, getPropertyDataSource());
+		}
+
+		@Override
+		public Class<Number> getModelType() {
+			return Number.class;
 		}
 		
 	}
