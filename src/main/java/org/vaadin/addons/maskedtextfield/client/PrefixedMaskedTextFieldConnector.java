@@ -3,7 +3,6 @@ package org.vaadin.addons.maskedtextfield.client;
 import org.vaadin.addons.maskedtextfield.PrefixedMaskedTextField;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.communication.StateChangeEvent;
 import com.vaadin.shared.ui.Connect;
 
@@ -13,7 +12,7 @@ public class PrefixedMaskedTextFieldConnector extends MaskedTextFieldConnector {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	protected Widget createWidget() {
+	protected PrefixedMaskedTextFieldWidget createWidget() {
 		return GWT.create(PrefixedMaskedTextFieldWidget.class);
 	}
 	
