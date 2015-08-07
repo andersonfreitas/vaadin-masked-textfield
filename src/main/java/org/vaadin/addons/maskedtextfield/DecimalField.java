@@ -48,6 +48,46 @@ public class DecimalField extends TextField {
 		setGroupingSeparator(groupingSeparator);
 	}
 	
+	@Override
+	public void setValue(String string) {
+		super.setValue(string);
+	}
+	/*
+	
+	public void setValue(Double number) {
+		setNumberValue(number);
+	}
+	
+	public void setValue(Float number) {
+		setNumberValue(number);
+	}
+	
+	public void setValue(Long number) {
+		setNumberValue(number);
+	}
+	
+	public void setValue(Integer number) {
+		setNumberValue(number);
+	}
+	
+	public void setValue(Short number) {
+		setNumberValue(number);
+	}
+	*/
+	
+	public void setValue(Number number) {
+		if(number != null) {
+			if(getConverter() != null) {
+				String v = getConverter().convertToPresentation(number, String.class, getLocale());
+				setValue(v);
+			} else {
+				setValue( (String) null);
+			}
+		} else {
+			setValue( (String) null);
+		}
+	}
+	
 	public void setMask(String mask) {
 		if(mask == null) {
 			throw new NullPointerException("The format mask cannot be null");
