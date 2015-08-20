@@ -185,6 +185,7 @@ public class DecimalField extends TextField {
 		@Override
 		public String convertToPresentation(Number value, Class<? extends String> targetType, Locale locale) throws ConversionException {
 			if(value != null) {
+				refreshFormatter();
 				return formatter.format(value);
 			}
 			return null;
