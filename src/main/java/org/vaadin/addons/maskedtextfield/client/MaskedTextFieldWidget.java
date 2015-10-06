@@ -309,9 +309,10 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 		} else if (event.getNativeKeyCode() == KeyCodes.KEY_END && !event.isShiftKeyDown()) {
 			setCursorPositionAndPreventDefault(event, getLastPosition());
 		} else if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-			if(!isFieldIfIncomplete()) {
-				super.onKeyDown(event);
+			if(isFieldIfIncomplete()) {
+				cleanText();
 			}
+			super.onKeyDown(event);
 		} else {
 			super.onKeyDown(event);
 		}
@@ -411,13 +412,18 @@ public class MaskedTextFieldWidget extends VTextField implements KeyDownHandler,
 		}
 	}
 
+	@Override
 	public void onBlur(BlurEvent event) {
 		if(isFieldIfIncomplete()) {
-			super.setText("");
-			valueChange(true);
+			cleanText();
 		} else {
 			super.onBlur(event);
 		}
+	}
+	
+	private void cleanText() {
+		super.setText("");
+		super.valueChange(true);
 	}
 	
 	protected boolean isFieldIfIncomplete() {
