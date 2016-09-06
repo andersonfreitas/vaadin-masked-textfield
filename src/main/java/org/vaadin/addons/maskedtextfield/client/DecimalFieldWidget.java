@@ -6,6 +6,8 @@ import org.vaadin.addons.maskedtextfield.shared.Constants;
 
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyPressEvent;
@@ -19,7 +21,7 @@ import com.vaadin.client.ui.VTextField;
  * @author Eduardo Frazao
  *
  */
-public class DecimalFieldWidget extends VTextField implements KeyPressHandler, BlurHandler {
+public class DecimalFieldWidget extends VTextField implements KeyPressHandler, BlurHandler, FocusHandler {
 	
 	
 	private char decimalSeparator;
@@ -30,6 +32,8 @@ public class DecimalFieldWidget extends VTextField implements KeyPressHandler, B
 	
 	private NumberFormat formatter;
 	private NumberFormat defaultFormatter = NumberFormat.getDecimalFormat();
+	
+	private boolean selectTextOnFocus = false;
 	
 	protected static char[] acceptedCharSet = {
 		(char) KeyCodes.KEY_BACKSPACE,
@@ -49,11 +53,20 @@ public class DecimalFieldWidget extends VTextField implements KeyPressHandler, B
 		Arrays.sort(acceptedCharSet);
 	}
 	
+	public boolean isSelectTextOnFocus() {
+		return selectTextOnFocus;
+	}
+
+	public void setSelectTextOnFocus(boolean selectTextOnFocus) {
+		this.selectTextOnFocus = selectTextOnFocus;
+	}
+
 	public DecimalFieldWidget() {
 		setAlignment(TextAlignment.RIGHT);
 		
 		addKeyPressHandler(this);
 		addKeyDownHandler(this);
+		addFocusHandler(this);
 		sinkEvents(Event.ONPASTE);
 		
 		NumberFormat.setForcedLatinDigits(false);
@@ -114,6 +127,17 @@ public class DecimalFieldWidget extends VTextField implements KeyPressHandler, B
 		refreshValue();
 	}
 	
+	@Override
+	public void onFocus(FocusEvent event) {
+		super.onFocus(event);
+		if(selectTextOnFocus) {
+			String text = getText();
+			if(text != null && !text.isEmpty()) {
+				setSelectionRange(0, text.length());
+			}
+		}
+	}
+
 	@Override
     public void onBrowserEvent(Event event) {
         super.onBrowserEvent(event);

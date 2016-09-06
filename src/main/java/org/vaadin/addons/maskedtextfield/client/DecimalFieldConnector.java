@@ -33,6 +33,7 @@ public class DecimalFieldConnector extends TextFieldConnector {
 		getWidget().setGroupingSeparator(getState().groupingSeparator);
 		getWidget().setDecimalSeparator(getState().decimalSeparator);
 		getWidget().setMask(getState().mask);
+		getWidget().setSelectTextOnFocus(getState().selectValuesOnFocus);
 		super.onStateChanged(stateChangeEvent);
 	}
 	
