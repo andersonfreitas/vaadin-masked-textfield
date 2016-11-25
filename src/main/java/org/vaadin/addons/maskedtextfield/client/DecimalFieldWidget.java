@@ -12,6 +12,7 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Event;
 import com.vaadin.client.ui.VTextField;
@@ -41,6 +42,7 @@ public class DecimalFieldWidget extends VTextField implements KeyPressHandler, B
 		(char) KeyCodes.KEY_DELETE,  
 		(char) KeyCodes.KEY_END,
 		(char) KeyCodes.KEY_ENTER,
+		(char) KeyCodes.KEY_UP,
 		(char) KeyCodes.KEY_ESCAPE,
 		(char) KeyCodes.KEY_HOME,
 		(char) KeyCodes.KEY_LEFT,
@@ -115,16 +117,18 @@ public class DecimalFieldWidget extends VTextField implements KeyPressHandler, B
 	
 	@Override
 	public void onKeyDown(KeyDownEvent event) {
-		super.onKeyDown(event);
 		if(event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+			
 			refreshValue();
+			
 		}
+		super.onKeyDown(event);
 	}
 
 	@Override
 	public void onBlur(BlurEvent event) {
-		super.onBlur(event);
 		refreshValue();
+		super.onBlur(event);
 	}
 	
 	@Override
@@ -148,14 +152,27 @@ public class DecimalFieldWidget extends VTextField implements KeyPressHandler, B
 	
 	public void onPaste(Event event) {
 		refreshValue();
+		valueChange(false);
 	}
 
 	private void refreshValue() {
-		super.setText(reformatContent(null));
+		updateText(reformatContent(null));
 	}
 	
 	private void refreshValue(String withFormatedValue) {
-		super.setText(reformatContent(withFormatedValue));
+		updateText(reformatContent(withFormatedValue));
+	}
+	
+	private void updateText(String text) {
+		String old = getText();
+		String newValue = text;
+		if(text != null || newValue != null) {
+			if((old == null || !newValue.equals(old)) || newValue == null) {
+				super.setText(text);
+				valueChange(false);
+			}
+		}
+		
 	}
 	
 	protected String reformatContent(String value) {
@@ -216,6 +233,7 @@ public class DecimalFieldWidget extends VTextField implements KeyPressHandler, B
 		if(decimalSeparator != this.decimalSeparator) {
 			this.decimalSeparator = decimalSeparator;
 			refreshValue();
+			valueChange(false);
 		}
 	}
 
@@ -227,6 +245,7 @@ public class DecimalFieldWidget extends VTextField implements KeyPressHandler, B
 		if(groupingSeparator != this.groupingSeparator) {
 			this.groupingSeparator = groupingSeparator;
 			refreshValue();
+			valueChange(false);
 		}
 	}
 
@@ -239,6 +258,7 @@ public class DecimalFieldWidget extends VTextField implements KeyPressHandler, B
 			this.mask = mask;
 			formatter = NumberFormat.getFormat(this.mask);
 			refreshValue();
+			valueChange(false);
 		}
 	}
 	
@@ -246,9 +266,20 @@ public class DecimalFieldWidget extends VTextField implements KeyPressHandler, B
 	public void setText(String value) {
 		if(value == null) {
 			super.setText(null);
+			setValue(value);
 		} else {
 			refreshValue(value);
 		}
 	}
+	
+	@Override
+	public void setValue(String value, boolean fireEvents) {
+	    String oldValue = fireEvents ? getValue() : null;
+	    setText(value);
+	    if (fireEvents) {
+	      String newValue = getValue();
+	      ValueChangeEvent.fireIfNotEqual(this, oldValue, newValue);
+	    }
+	  }
 	
 }
