@@ -16,36 +16,44 @@ public class DecimalField extends TextField {
 
 	private static final long serialVersionUID = 1L;
 
+	private MaskNumberConverter localConverter = null;
+	
 	public DecimalField() {
 		super();
-		setConverter(new MaskNumberConverter());
+		initConverter();
 	}
 
 	public DecimalField(Property<?> dataSource) {
 		super(dataSource);
-		setConverter(new MaskNumberConverter());
+		initConverter();
 	}
 
 	public DecimalField(String caption, Property<?> dataSource) {
 		super(caption, dataSource);
-		setConverter(new MaskNumberConverter());
+		initConverter();
 	}
 
 	public DecimalField(String caption, String value) {
 		super(caption, value);
-		setConverter(new MaskNumberConverter());
+		initConverter();
 	}
 
 	public DecimalField(String caption) {
 		super(caption);
-		setConverter(new MaskNumberConverter());
+		initConverter();
 	}
 	
 	public DecimalField(String mask, char decimalSeparator, char groupingSeparator) {
-		this();
+		super();
 		setMask(mask);
 		setDecimalSeparator(decimalSeparator);
 		setGroupingSeparator(groupingSeparator);
+		initConverter();
+	}
+
+	private void initConverter() {
+		localConverter = new MaskNumberConverter();
+		setConverter(localConverter);
 	}
 	
 	@Override
@@ -74,6 +82,8 @@ public class DecimalField extends TextField {
 			throw new IllegalStateException("The format mask cannot be empty");
 		}
 		getState().mask = mask;
+		if(localConverter != null)
+			localConverter.refreshFormatter();
 	}
 	
 	public String getMask() {
@@ -135,7 +145,7 @@ public class DecimalField extends TextField {
 			refreshFormatter();
 		}
 		
-		private void refreshFormatter() {
+		public void refreshFormatter() {
 			if(formatter == null || 
 					(	formatter.getDecimalFormatSymbols().getGroupingSeparator() != getGroupingSeparator()
 					||  formatter.getDecimalFormatSymbols().getDecimalSeparator() != getDecimalSeparator()
@@ -145,7 +155,7 @@ public class DecimalField extends TextField {
 				DecimalFormatSymbols decimalSymbols = new DecimalFormatSymbols();
 				decimalSymbols.setGroupingSeparator(getGroupingSeparator());
 				decimalSymbols.setDecimalSeparator(getDecimalSeparator());
-				formatter = new DecimalFormat();
+				formatter = new DecimalFormat(getMask());
 				formatter.setDecimalFormatSymbols(decimalSymbols);
 			}
 		}
