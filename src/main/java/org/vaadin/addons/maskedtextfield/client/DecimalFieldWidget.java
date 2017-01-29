@@ -4,6 +4,8 @@ import java.util.Arrays;
 
 import org.vaadin.addons.maskedtextfield.shared.Constants;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
@@ -135,10 +137,15 @@ public class DecimalFieldWidget extends VTextField implements KeyPressHandler, B
 	public void onFocus(FocusEvent event) {
 		super.onFocus(event);
 		if(selectTextOnFocus) {
-			String text = getText();
-			if(text != null && !text.isEmpty()) {
-				setSelectionRange(0, text.length());
-			}
+			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+				@Override
+				public void execute() {
+					String text = getText();
+					if(text != null && !text.isEmpty()) {
+						setSelectionRange(0, text.length());
+					}
+				}
+			});
 		}
 	}
 
