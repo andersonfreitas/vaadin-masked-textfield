@@ -50,7 +50,7 @@ public class DecimalFieldWidget extends VTextField implements KeyPressHandler, B
 		(char) KeyCodes.KEY_LEFT,
 		(char) KeyCodes.KEY_PAGEDOWN,
 		(char) KeyCodes.KEY_PAGEUP,
-		(char) KeyCodes.KEY_RIGHT
+		(char) KeyCodes.KEY_RIGHT,
 	};
 	
 	static {
@@ -105,10 +105,15 @@ public class DecimalFieldWidget extends VTextField implements KeyPressHandler, B
 				|| Arrays.binarySearch(acceptedCharSet, charCode) >= 0;
 	}
 	
+	private boolean isSignalValueInput(char charCode) {
+		return getCursorPos() == 0 && charCode == '-';
+	}
+	
 	@Override
 	public void onKeyPress(KeyPressEvent event) {
 		if(!isCopyOrPasteEvent(event)) {
-			if (event.getCharCode() != Constants.EMPTY_CHAR && !isAcceptedKey(event.getCharCode()) ) {
+			char code = event.getCharCode();
+			if (event.getCharCode() != Constants.EMPTY_CHAR && !isAcceptedKey(code) && !isSignalValueInput(code) )  {
 				cancelKey();
 			} else if(!getText().trim().isEmpty() && formatter.parse(getText()) >= maxValue.doubleValue()) {
 				cancelKey();
