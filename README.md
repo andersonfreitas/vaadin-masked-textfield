@@ -46,3 +46,9 @@ Some mask examples:
  - 30th June 2011 (tag 0.1.2)
  - tab key press corrected
  - cursor is positioned in first position allowed when field is focused.
+ 
+ # License
+ 
+ The MaskedTextField for Vaadin is licensed under the 
+ 
+	Apache License Version 2.0	http://www.apache.org/licenses/LICENSE-2.0.html
