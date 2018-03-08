@@ -5,14 +5,17 @@
 	<groupId>org.vaadin.addons</groupId>
 	<artifactId>maskedtextfield</artifactId>
 	<packaging>jar</packaging>
-	<version>0.1.3</version>
+	<version>0.1.14</version>
 	<name>MaskedField Vaadin Addon</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<vaadin.version>7.0.5</vaadin.version>
+		<vaadin.version>7.7.6</vaadin.version>
 		<vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
 		<bundlor.manifest.output.dir>target/classes</bundlor.manifest.output.dir>
+		<jetty.version>9.2.12.v20150709</jetty.version>
+		<jetty.port>7080</jetty.port>
+		<context.path>/masked</context.path>
 	</properties>
 
 	<licenses>
@@ -103,8 +106,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.0</version>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>1.7</source>
+					<target>1.7</target>
 				</configuration>
 			</plugin>
 
@@ -196,14 +199,19 @@
 			</plugin>
 
 			<plugin>
-				<groupId>org.mortbay.jetty</groupId>
+				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>8.1.9.v20130131</version>
+				<version>${jetty.version}</version>
 				<configuration>
-					<contextPath>/</contextPath>
+        			<httpConnector>
+          				<port>${jetty.port}</port>
+        			</httpConnector>
+        			<webApp>
+				      <contextPath>${context.path}</contextPath>
+				    </webApp>
 					<webAppSourceDirectory>${basedir}/src/test/webapp</webAppSourceDirectory>
 					<useTestScope>true</useTestScope>
-				</configuration>
+      			</configuration>
 			</plugin>
 
 			<plugin>
@@ -254,7 +262,7 @@
 											vaadin-maven-plugin
 										</artifactId>
 										<versionRange>
-											[7.0.2,)
+											[7.1.0,)
 										</versionRange>
 										<goals>
 											<goal>

@@ -4,12 +4,17 @@ import java.util.Arrays;
 
 import org.vaadin.addons.maskedtextfield.shared.Constants;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Event;
 import com.vaadin.client.ui.VTextField;
@@ -19,7 +24,7 @@ import com.vaadin.client.ui.VTextField;
  * @author Eduardo Frazao
  *
  */
-public class DecimalFieldWidget extends VTextField implements KeyPressHandler, BlurHandler {
+public class DecimalFieldWidget extends VTextField implements KeyPressHandler, BlurHandler, FocusHandler {
 	
 	
 	private char decimalSeparator;
@@ -31,29 +36,41 @@ public class DecimalFieldWidget extends VTextField implements KeyPressHandler, B
 	private NumberFormat formatter;
 	private NumberFormat defaultFormatter = NumberFormat.getDecimalFormat();
 	
+	private boolean selectTextOnFocus = false;
+	
 	protected static char[] acceptedCharSet = {
 		(char) KeyCodes.KEY_BACKSPACE,
 		(char) KeyCodes.KEY_TAB,
 		(char) KeyCodes.KEY_DELETE,  
 		(char) KeyCodes.KEY_END,
 		(char) KeyCodes.KEY_ENTER,
+		(char) KeyCodes.KEY_UP,
 		(char) KeyCodes.KEY_ESCAPE,
 		(char) KeyCodes.KEY_HOME,
 		(char) KeyCodes.KEY_LEFT,
 		(char) KeyCodes.KEY_PAGEDOWN,
 		(char) KeyCodes.KEY_PAGEUP,
-		(char) KeyCodes.KEY_RIGHT
+		(char) KeyCodes.KEY_RIGHT,
 	};
 	
 	static {
 		Arrays.sort(acceptedCharSet);
 	}
 	
+	public boolean isSelectTextOnFocus() {
+		return selectTextOnFocus;
+	}
+
+	public void setSelectTextOnFocus(boolean selectTextOnFocus) {
+		this.selectTextOnFocus = selectTextOnFocus;
+	}
+
 	public DecimalFieldWidget() {
 		setAlignment(TextAlignment.RIGHT);
 		
 		addKeyPressHandler(this);
 		addKeyDownHandler(this);
+		addFocusHandler(this);
 		sinkEvents(Event.ONPASTE);
 		
 		NumberFormat.setForcedLatinDigits(false);
@@ -88,10 +105,15 @@ public class DecimalFieldWidget extends VTextField implements KeyPressHandler, B
 				|| Arrays.binarySearch(acceptedCharSet, charCode) >= 0;
 	}
 	
+	private boolean isSignalValueInput(char charCode) {
+		return getCursorPos() == 0 && charCode == '-';
+	}
+	
 	@Override
 	public void onKeyPress(KeyPressEvent event) {
 		if(!isCopyOrPasteEvent(event)) {
-			if (event.getCharCode() != Constants.EMPTY_CHAR && !isAcceptedKey(event.getCharCode()) ) {
+			char code = event.getCharCode();
+			if (event.getCharCode() != Constants.EMPTY_CHAR && !isAcceptedKey(code) && !isSignalValueInput(code) )  {
 				cancelKey();
 			} else if(!getText().trim().isEmpty() && formatter.parse(getText()) >= maxValue.doubleValue()) {
 				cancelKey();
@@ -102,18 +124,36 @@ public class DecimalFieldWidget extends VTextField implements KeyPressHandler, B
 	
 	@Override
 	public void onKeyDown(KeyDownEvent event) {
-		super.onKeyDown(event);
 		if(event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+			
 			refreshValue();
+			
 		}
+		super.onKeyDown(event);
 	}
 
 	@Override
 	public void onBlur(BlurEvent event) {
-		super.onBlur(event);
 		refreshValue();
+		super.onBlur(event);
 	}
 	
+	@Override
+	public void onFocus(FocusEvent event) {
+		super.onFocus(event);
+		if(selectTextOnFocus) {
+			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+				@Override
+				public void execute() {
+					String text = getText();
+					if(text != null && !text.isEmpty()) {
+						setSelectionRange(0, text.length());
+					}
+				}
+			});
+		}
+	}
+
 	@Override
     public void onBrowserEvent(Event event) {
         super.onBrowserEvent(event);
@@ -124,27 +164,33 @@ public class DecimalFieldWidget extends VTextField implements KeyPressHandler, B
 	
 	public void onPaste(Event event) {
 		refreshValue();
+		valueChange(false);
 	}
 
 	private void refreshValue() {
-		super.setText(reformatContent(null));
+		updateText(reformatContent(null));
 	}
 	
 	private void refreshValue(String withFormatedValue) {
-		super.setText(reformatContent(withFormatedValue));
+		updateText(reformatContent(withFormatedValue));
+	}
+	
+	private void updateText(String text) {
+		String old = getText();
+		String newValue = text;
+		if(text != null || newValue != null) {
+			if((old == null || !newValue.equals(old)) || newValue == null) {
+				super.setText(text);
+				valueChange(false);
+			}
+		}
+		
 	}
 	
 	protected String reformatContent(String value) {
 	    String str = value == null ? getText() : value;
 	    if(!str.trim().isEmpty()) {
 	    	double amount = readDoubleFromFormattedValue(value);
-	    	/*
-	    	if(value == null) {
-	    		amount = readDoubleFromFormattedValue(value);
-	    	} else {
-	    		amount = parseDouble(value);
-	    	}
-	    	*/
 	  	    return replaceSeparators(formatter.format(amount));
 	    } 
 	    return str;
@@ -199,6 +245,7 @@ public class DecimalFieldWidget extends VTextField implements KeyPressHandler, B
 		if(decimalSeparator != this.decimalSeparator) {
 			this.decimalSeparator = decimalSeparator;
 			refreshValue();
+			valueChange(false);
 		}
 	}
 
@@ -210,6 +257,7 @@ public class DecimalFieldWidget extends VTextField implements KeyPressHandler, B
 		if(groupingSeparator != this.groupingSeparator) {
 			this.groupingSeparator = groupingSeparator;
 			refreshValue();
+			valueChange(false);
 		}
 	}
 
@@ -222,12 +270,28 @@ public class DecimalFieldWidget extends VTextField implements KeyPressHandler, B
 			this.mask = mask;
 			formatter = NumberFormat.getFormat(this.mask);
 			refreshValue();
+			valueChange(false);
 		}
 	}
 	
 	@Override
 	public void setText(String value) {
-		refreshValue(value);
+		if(value == null) {
+			super.setText(null);
+			setValue(value);
+		} else {
+			refreshValue(value);
+		}
 	}
+	
+	@Override
+	public void setValue(String value, boolean fireEvents) {
+	    String oldValue = fireEvents ? getValue() : null;
+	    setText(value);
+	    if (fireEvents) {
+	      String newValue = getValue();
+	      ValueChangeEvent.fireIfNotEqual(this, oldValue, newValue);
+	    }
+	  }
 	
 }

@@ -12,4 +12,6 @@ public class DecimalFieldState extends AbstractTextFieldState {
 	
 	public String mask = "#.00";
 
+	public boolean selectValuesOnFocus = false;
+	
 }

@@ -6,46 +6,72 @@ import java.text.ParseException;
 import java.util.Locale;
 
 import org.vaadin.addons.maskedtextfield.client.DecimalFieldState;
-import org.vaadin.addons.maskedtextfield.shared.Utils;
+import org.vaadin.addons.maskedtextfield.server.Utils;
 
 import com.vaadin.data.Property;
-import com.vaadin.data.util.converter.StringToNumberConverter;
+import com.vaadin.data.util.converter.AbstractStringToNumberConverter;
 import com.vaadin.ui.TextField;
 
 public class DecimalField extends TextField {
 
 	private static final long serialVersionUID = 1L;
 
+	private MaskNumberConverter localConverter = null;
+	
 	public DecimalField() {
 		super();
-		setConverter(new MaskNumberConverter());
+		initConverter();
 	}
 
 	public DecimalField(Property<?> dataSource) {
 		super(dataSource);
-		setConverter(new MaskNumberConverter());
+		initConverter();
 	}
 
 	public DecimalField(String caption, Property<?> dataSource) {
 		super(caption, dataSource);
-		setConverter(new MaskNumberConverter());
+		initConverter();
 	}
 
 	public DecimalField(String caption, String value) {
 		super(caption, value);
-		setConverter(new MaskNumberConverter());
+		initConverter();
 	}
 
 	public DecimalField(String caption) {
 		super(caption);
-		setConverter(new MaskNumberConverter());
+		initConverter();
 	}
 	
 	public DecimalField(String mask, char decimalSeparator, char groupingSeparator) {
-		this();
+		super();
 		setMask(mask);
 		setDecimalSeparator(decimalSeparator);
 		setGroupingSeparator(groupingSeparator);
+		initConverter();
+	}
+
+	private void initConverter() {
+		localConverter = new MaskNumberConverter();
+		setConverter(localConverter);
+	}
+	
+	@Override
+	public void setValue(String string) {
+		super.setValue(string);
+	}
+	
+	public void setValue(Number number) {
+		if(number != null) {
+			if(getConverter() != null) {
+				String v = getConverter().convertToPresentation(number, String.class, getLocale());
+				setValue(v);
+			} else {
+				setValue( (String) null);
+			}
+		} else {
+			setValue( (String) null);
+		}
 	}
 	
 	public void setMask(String mask) {
@@ -56,6 +82,8 @@ public class DecimalField extends TextField {
 			throw new IllegalStateException("The format mask cannot be empty");
 		}
 		getState().mask = mask;
+		if(localConverter != null)
+			localConverter.refreshFormatter();
 	}
 	
 	public String getMask() {
@@ -83,13 +111,23 @@ public class DecimalField extends TextField {
 		return (DecimalFieldState) super.getState();
 	}
 	
+	public void setSelectValueOnFocus(boolean selectOnFocus) {
+		getState().selectValuesOnFocus = selectOnFocus;
+	}
+	
+	public boolean isSelectValueOnFocus() {
+		return getState().selectValuesOnFocus;
+	}
+	
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void setPropertyDataSource(Property newDataSource) {
-		if(!Number.class.isAssignableFrom(newDataSource.getType())) {
-			throw new IllegalArgumentException("This field is compatible with number datasources only");
+		if(newDataSource != null) {
+			if(!Number.class.isAssignableFrom(newDataSource.getType())) {
+				throw new IllegalArgumentException("This field is compatible with number datasources only");
+			}
+			super.setPropertyDataSource(newDataSource);
 		}
-		super.setPropertyDataSource(newDataSource);
 	}
 
 	/**
@@ -97,7 +135,7 @@ public class DecimalField extends TextField {
 	 * @author eduardo
 	 *
 	 */
-	private class MaskNumberConverter extends StringToNumberConverter {
+	private class MaskNumberConverter extends AbstractStringToNumberConverter<Number> {
 
 		private static final long serialVersionUID = 1L;
 
@@ -107,7 +145,7 @@ public class DecimalField extends TextField {
 			refreshFormatter();
 		}
 		
-		private void refreshFormatter() {
+		public void refreshFormatter() {
 			if(formatter == null || 
 					(	formatter.getDecimalFormatSymbols().getGroupingSeparator() != getGroupingSeparator()
 					||  formatter.getDecimalFormatSymbols().getDecimalSeparator() != getDecimalSeparator()
@@ -117,13 +155,14 @@ public class DecimalField extends TextField {
 				DecimalFormatSymbols decimalSymbols = new DecimalFormatSymbols();
 				decimalSymbols.setGroupingSeparator(getGroupingSeparator());
 				decimalSymbols.setDecimalSeparator(getDecimalSeparator());
-				formatter = new DecimalFormat();
+				formatter = new DecimalFormat(getMask());
 				formatter.setDecimalFormatSymbols(decimalSymbols);
 			}
 		}
 		
+		
 		@Override
-		public Number convertToModel(String value, Locale locale) throws ConversionException {
+		public Number convertToModel(String value, Class<? extends Number> targetType, Locale locale) throws ConversionException {
 			refreshFormatter();
 			try {
 				if(value == null || value.trim().isEmpty()) {
@@ -140,8 +179,17 @@ public class DecimalField extends TextField {
 		}
 
 		@Override
-		public String convertToPresentation(Number value, Locale locale) throws ConversionException {
-			return formatter.format(value);
+		public String convertToPresentation(Number value, Class<? extends String> targetType, Locale locale) throws ConversionException {
+			if(value != null) {
+				refreshFormatter();
+				return formatter.format(value);
+			}
+			return null;
+		}
+
+		@Override
+		public Class<Number> getModelType() {
+			return Number.class;
 		}
 
 	}

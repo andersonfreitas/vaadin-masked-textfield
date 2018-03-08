@@ -11,6 +11,41 @@ public class NumericField extends TextField {
 		super();
 	}
 
+	/*
+	public void setValue(Short number) {
+		setNumberValue((Number) number);
+	}
+	
+	public void setValue(Integer number) {
+		setNumberValue((Number) number);
+	}
+	
+	public void setValue(Long number) {
+		setNumberValue((Number) number);
+	}
+	
+	public void setValue(Double number) {
+		setNumberValue(number);
+	}
+	
+	public void setValue(Float number) {
+		setNumberValue(number);
+	}
+	*/
+	
+	public void setValue(Number number) {
+		if(number != null) {
+			if(getConverter() != null) {
+				String v = getConverter().convertToPresentation(number, String.class, getLocale());
+				setValue(v);
+			} else {
+				setValue( (String) null);
+			}
+		} else {
+			setValue( (String) null);
+		}
+	}
+	
 	public NumericField(Property<Number> dataSource) {
 		super(dataSource);
 	}

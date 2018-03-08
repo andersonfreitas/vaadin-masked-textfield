@@ -8,7 +8,7 @@ src/test
 src/rebel.xml
 src/main/webapp
 dist/*
-/target
-.settings/
+target
+.settings
 .project
 .classpath
